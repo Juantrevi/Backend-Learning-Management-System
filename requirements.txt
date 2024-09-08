@@ -6,7 +6,7 @@ cffi
 charset-normalizer
 cryptography
 dj-database-url
-Django
+Django==5.0
 django-anymail
 django-cors-headers
 django-jazzmin
