@@ -129,6 +129,8 @@ MEDIA_URL = '/media/'  # URL to access media files
 
 MEDIA_ROOT = BASE_DIR / 'media'  # Root directory for media files
 
+AUTH_USER_MODEL = 'userauths.User'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
