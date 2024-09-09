@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -61,7 +62,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -118,12 +119,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+
+STATIC_ROOT = BASE_DIR / 'templates'
+
+MEDIA_URL = '/media/'  # URL to access media files
+
+MEDIA_ROOT = BASE_DIR / 'media'  # Root directory for media files
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -141,7 +145,13 @@ JAZZMIN_SETTINGS = {
     "site_brand": "Bulbed LMS",
 
     # Logo to use for your site, must be present in static files, used for brand on top left
-    #"site_logo": "static/images/bulbed-logo.svg",
+    "site_logo": "images/favicon.svg",
+
+    # Logo to use for your site, must be present in static files, used for login form logo (defaults to site_logo)
+    "login_logo": "images/bulbed-logo.svg",
+
+    # Relative path to a favicon for your site, will default to site_logo if absent (ideally 32x32 px)
+    "site_icon": 'images/favicon.svg',
 
     # Welcome text on the login screen
     "welcome_sign": "Welcome to Bulbed Education Platform",
@@ -151,6 +161,7 @@ JAZZMIN_SETTINGS = {
 
     # Whether to show the UI customizer on the sidebar
     "show_ui_builder": False,
+
 }
 
 JAZZMIN_UI_TWEAKS = {
@@ -158,7 +169,7 @@ JAZZMIN_UI_TWEAKS = {
     "footer_small_text": False,
     "body_small_text": True,
     "brand_small_text": False,
-    "brand_colour": "navbar-indigo",
+    "brand_colour": None,
     "accent": "accent-danger",
     "navbar": "navbar-white navbar-light",
     "no_navbar_border": False,
@@ -184,5 +195,3 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-success"
     }
 }
-
-
