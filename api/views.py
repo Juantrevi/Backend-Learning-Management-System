@@ -7,13 +7,20 @@ from userauths.models import User, Profile
 from rest_framework.permissions import AllowAny
 
 
-# Define a custom view for obtaining JWT tokens
+# This view is used to obtain JSON Web Tokens (JWT)
+# for user authentication. It uses a custom serializer
+# to include additional user information in the token.
 class MyTokenObtainPairView(TokenObtainPairView):
     # Specify the custom serializer to use for this view
     serializer_class = api_serializer.MyTokenObtainPairSerializer
 
 
+# handles user registration. It allows anyone
+# to create a new user account by providing
+# the necessary information
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
+    # Allow any user to access this view (no authentication required)
     permission_classes = [AllowAny]
+    # Specify the serializer to use for this view
     serializer_class = api_serializer.RegisterSerializer
