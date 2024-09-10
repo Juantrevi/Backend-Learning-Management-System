@@ -37,3 +37,18 @@
     any part of the application or to send it to the
     client (frontend).
 
+# JWT (STATELESS)
+    JSON Web Token (JWT) is an open standard (RFC 7519)
+    that defines a compact and self-contained way for
+    securely transmitting information between parties
+    as a JSON object. This information can be verified
+    and trusted because it is digitally signed.
+    JWTs can be signed using a secret (with the HMAC algorithm)
+    or a public/private key pair using RSA or ECDSA.
+    This token is a secured encrypted note containing user
+    information (Flexible) and secret code known only by the website,
+    it is sent with every request to the server to verify
+    if its valid you're allowed to access the data or not.
+    Works with different systems and apps, and it simplifies
+    development.
+
