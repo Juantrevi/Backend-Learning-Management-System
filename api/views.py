@@ -1,3 +1,5 @@
+import random
+
 from django.shortcuts import render
 from api import serializer as api_serializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -5,6 +7,14 @@ from rest_framework import generics
 
 from userauths.models import User, Profile
 from rest_framework.permissions import AllowAny
+
+from rest_framework_simplejwt.tokens import RefreshToken
+
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 # This view is used to obtain JSON Web Tokens (JWT)
@@ -24,3 +34,47 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
     # Specify the serializer to use for this view
     serializer_class = api_serializer.RegisterSerializer
+
+
+def generate_random_otp(length=7):
+    otp = ''.join([str(random.randint(0, 9)) for _ in range(length)])
+    return otp
+
+
+class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
+    # Allow any user to access this view (no authentication required)
+    permission_classes = [AllowAny]
+    # Specify the serializer to use for this view
+    serializer_class = api_serializer.UserSerializer
+
+    # Method to get the user object based on the email provided in the URL
+    def get_object(self):
+        # Get the email from the URL parameters
+        email = self.kwargs['email']
+
+        # Find the user with the given email
+        user = User.objects.filter(email=email).first()
+
+        # If the user exists
+        if user:
+            # Get the user's primary key (UUID)
+            uuidb64 = user.pk
+            # Generate a new JWT refresh token for the user
+            refresh = RefreshToken.for_user(user)
+            # Convert the refresh token to a string
+            refresh_token = str(refresh.access_token)
+            # Set the user's refresh token
+            user.refresh_token = refresh_token
+            # Generate a random OTP (One-Time Password)
+            user.otp = generate_random_otp()
+
+            # Save the user object with the new OTP and refresh token
+            user.save()
+
+            # Create a link for the password reset page with the OTP, UUID, and refresh token as query parameters
+            link = f"{os.getenv('ROOT_URL')}/create-new-password/?otp={user.otp}&uuidb64={uuidb64}&refresh_token={refresh_token}"
+            # Print the link (for debugging purposes)
+            print(link)
+
+        # Return the user object
+        return user
