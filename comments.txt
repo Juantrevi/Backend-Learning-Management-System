@@ -1,0 +1,39 @@
+# Command Lines
+
+    .\runserver.bat -> To start the server with the runserver.bat which triggers:
+        - venv\Scripts\activate
+        - python manage.py runserver
+
+    .\migrate.bat -> To migrate the database with the migrate.bat which triggers:
+        - venv\Scripts\activate
+        - python manage.py makemigrations
+        - python manage.py migrate
+
+    python manage.py createsuperuser -> To create a superuser (Admin)
+
+    pip freeze -> To list all the installed packages and their versions
+
+    pip install -r requirements.txt -> To install all the packages listed in the requirements.txt file
+
+    django-admin startproject backend . -> To create a new project named backend
+
+    python manage.py startapp api -> To create a new app named api in the project
+
+# Jazzmin
+    Jazzmin is a modern looking Django admin theme using bootstrap 4.
+    It has a custom sidebar menu with multi-level dropdowns and active classes.
+    It is fully responsive and it is very easy to customize.
+
+# Serializer
+    Serializers allow complex data such as querysets
+    and model instances to be converted to native Python
+    datatypes that can then be easily rendered into JSON,
+    XML or other content types.
+    Serializers also provide deserialization,
+    allowing parsed data to be converted back into
+    complex types, after first validating the incoming data.
+    Basically, what we try to do is to convert a Django
+    model to JSON formatto access it from anywhere in
+    any part of the application or to send it to the
+    client (frontend).
+

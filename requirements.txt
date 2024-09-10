@@ -12,7 +12,7 @@ django-cors-headers
 django-jazzmin
 django-storages
 django-ckeditor-5
-djangorestframework
+djangorestframework~=3.15.2
 djangorestframework-simplejwt
 drf-yasg
 environs

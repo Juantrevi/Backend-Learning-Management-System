@@ -12,3 +12,4 @@ class ProfileAdmin(admin.ModelAdmin):
 admin.site.register(User)
 # Register the Profile model with the admin site using the custom ProfileAdmin class
 admin.site.register(Profile, ProfileAdmin)
+

@@ -70,14 +70,22 @@ class Profile(models.Model):
 #     about, and sets default values for full_name if not provided.
 
 
+# Function to create a user profile when a new user is created
 def create_user_profile(sender, instance, created, **kwargs):
+    # Check if the user instance was just created
     if created:
+        # Create a Profile instance linked to the new user
         Profile.objects.create(user=instance)
 
 
+# Function to save the user profile when the user is saved
 def save_user_profile(sender, instance, **kwargs):
+    # Save the profile associated with the user instance
     instance.profile.save()
 
 
+# Connect the create_user_profile function to the User model's post_save signal
 post_save.connect(create_user_profile, sender=User)
+
+# Connect the save_user_profile function to the User model's post_save signal
 post_save.connect(save_user_profile, sender=User)
