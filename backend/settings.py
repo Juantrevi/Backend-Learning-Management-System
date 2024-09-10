@@ -46,15 +46,15 @@ INSTALLED_APPS = [
     # Custom Apps
     'core',
     'userauths',
-    'api'
+    'api',
 
     # Third Party Apps
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',  # To allow requests from all origins, like an application from react or angular
-    'anymail',
-    'storages',
-    'django_ckeditor_5',
+    # 'anymail',
+    # 'storages',
+    # 'django_ckeditor_5',
 
 ]
 
