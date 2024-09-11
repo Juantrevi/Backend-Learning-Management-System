@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',  # To allow requests from all origins, like an application from react or angular
     'anymail',
+    'drf_yasg'
     # 'storages',
     # 'django_ckeditor_5',
 
@@ -248,6 +249,7 @@ SIMPLE_JWT = {
 # Set coresheader to allow all origin
 CORS_ALLOW_ALL_ORIGINS = True
 
+# Mailgun config
 MAILGUN_API_KEY = env('MAILGUN_API_KEY')
 MAILGUN_SENDER_DOMAIN = env('MAILGUN_SENDER_DOMAIN')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')

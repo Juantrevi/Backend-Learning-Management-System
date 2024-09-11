@@ -80,23 +80,33 @@ class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
             # Create a link for the password reset page with the OTP, UUID, and refresh token as query parameters
             link = f"{env('ROOT_URL')}/create-new-password/?otp={user.otp}&uuidb64={uuidb64}&refresh_token={refresh_token}"
 
+            # Prepare the data to be used in the email template
             merge_data = {
-                "link" : link,
-                "username" : user.username
+                "link": link,  # The password reset link
+                "username": user.username  # The username of the recipient
             }
 
+            # Set the subject of the email
             subject = "Password Reset Email"
+
+            # Render the plain text version of the email body using the template and merge data
             text_body = render_to_string("email/password_reset.txt", merge_data)
+
+            # Render the HTML version of the email body using the template and merge data
             html_body = render_to_string("email/password_reset.html", merge_data)
 
+            # Create an email message object with the subject, from email, to email, and plain text body
             msg = EmailMultiAlternatives(
                 subject=subject,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[user.email],
-                #to=['juantrevi70@gmail.com'],
-                body=text_body
+                from_email=settings.DEFAULT_FROM_EMAIL,  # The sender's email address
+                to=[user.email],  # The recipient's email address
+                body=text_body  # The plain text body of the email
             )
+
+            # Attach the HTML version of the email body to the message
             msg.attach_alternative(html_body, "text/html")
+
+            # Send the email
             msg.send()
 
             # Print the link (for debugging purposes)
@@ -107,22 +117,33 @@ class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
 
 
 class PasswordChangeAPIView(generics.CreateAPIView):
+    # Allow any user to access this view (no authentication required)
     permission_classes = [AllowAny]
+    # Specify the serializer to use for this view
     serializer_class = api_serializer.UserSerializer
 
+    # Handle the POST request to change the user's password
     def create(self, request, *args, **kwargs):
+        # Extract the data from the request
         payload = request.data
 
+        # Get the OTP, UUID, and new password from the payload
         otp = payload['otp']
         uuidb64 = payload['uuidb64']
         password = payload['password']
 
+        # Retrieve the user object based on the provided UUID and OTP
         user = User.objects.get(id=uuidb64, otp=otp)
         if user:
+            # Set the new password for the user
             user.set_password(password)
+            # Clear the OTP
             user.otp = ""
+            # Save the user object with the new password
             user.save()
 
+            # Return a success message
             return Response({"message": "Password changed successfully"}, status=status.HTTP_201_CREATED)
         else:
-            return Response({"message": "User does not exists"}, status=status.HTTP_404_NOT_FOUND)
+            # Return an error message if the user does not exist
+            return Response({"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
