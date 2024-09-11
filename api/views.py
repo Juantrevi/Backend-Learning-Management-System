@@ -1,9 +1,11 @@
 import random
 
 from django.shortcuts import render
+from rest_framework.response import Response
+
 from api import serializer as api_serializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework import generics
+from rest_framework import generics, status
 
 from userauths.models import User, Profile
 from rest_framework.permissions import AllowAny
@@ -11,10 +13,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 
 import os
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
+from environs import Env
+env = Env()
+env.read_env()
 
 
 # This view is used to obtain JSON Web Tokens (JWT)
@@ -72,9 +73,31 @@ class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
             user.save()
 
             # Create a link for the password reset page with the OTP, UUID, and refresh token as query parameters
-            link = f"{os.getenv('ROOT_URL')}/create-new-password/?otp={user.otp}&uuidb64={uuidb64}&refresh_token={refresh_token}"
+            link = f"{env('ROOT_URL')}/create-new-password/?otp={user.otp}&uuidb64={uuidb64}&refresh_token={refresh_token}"
             # Print the link (for debugging purposes)
             print(link)
 
         # Return the user object
         return user
+
+
+class PasswordChangeAPIView(generics.CreateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = api_serializer.UserSerializer
+
+    def create(self, request, *args, **kwargs):
+        payload = request.data
+
+        otp = payload['otp']
+        uuidb64 = payload['uuidb64']
+        password = payload['password']
+
+        user = User.objects.get(id=uuidb64, otp=otp)
+        if user:
+            user.set_password(password)
+            user.otp = ""
+            user.save()
+
+            return Response({"message": "Password changed successfully"}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"message": "User does not exists"}, status=status.HTTP_404_NOT_FOUND)
