@@ -3,12 +3,17 @@ import random
 from django.shortcuts import render
 from rest_framework.response import Response
 
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+
 from api import serializer as api_serializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status
 
 from userauths.models import User, Profile
 from rest_framework.permissions import AllowAny
+
+from django.conf import settings
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -74,6 +79,26 @@ class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
 
             # Create a link for the password reset page with the OTP, UUID, and refresh token as query parameters
             link = f"{env('ROOT_URL')}/create-new-password/?otp={user.otp}&uuidb64={uuidb64}&refresh_token={refresh_token}"
+
+            merge_data = {
+                "link" : link,
+                "username" : user.username
+            }
+
+            subject = "Password Reset Email"
+            text_body = render_to_string("email/password_reset.txt", merge_data)
+            html_body = render_to_string("email/password_reset.html", merge_data)
+
+            msg = EmailMultiAlternatives(
+                subject=subject,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[user.email],
+                #to=['juantrevi70@gmail.com'],
+                body=text_body
+            )
+            msg.attach_alternative(html_body, "text/html")
+            msg.send()
+
             # Print the link (for debugging purposes)
             print(link)
 

@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',  # To allow requests from all origins, like an application from react or angular
-    # 'anymail',
+    'anymail',
     # 'storages',
     # 'django_ckeditor_5',
 
@@ -117,7 +117,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-MAILGUN_SECRET_KEY = env('MAILGUN_SECRET_KEY')
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -248,5 +247,15 @@ SIMPLE_JWT = {
 
 # Set coresheader to allow all origin
 CORS_ALLOW_ALL_ORIGINS = True
+
+MAILGUN_API_KEY = env('MAILGUN_API_KEY')
+MAILGUN_SENDER_DOMAIN = env('MAILGUN_SENDER_DOMAIN')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
+
+ANYMAIL = {
+    "MAILGUN_API_KEY": env('MAILGUN_API_KEY'),
+    "MAILGUN_SENDER_DOMAIN": env('MAILGUN_SENDER_DOMAIN')
+}
 
 
