@@ -73,8 +73,7 @@ class Course(models.Model):
     language = models.CharField(choices=CourseConstants.LANGUAGES, default='English', max_length=100)
     level = models.CharField(choices=CourseConstants.LEVEL, default='Beginner', max_length=100)
     platform_status = models.CharField(choices=CourseConstants.PLATFORM_STATUS, default='Published', max_length=100)
-    teacher_course_status = models.CharField(choices=CourseConstants.TEACHER_STATUS, default='Published',
-                                             max_length=100)
+    teacher_course_status = models.CharField(choices=CourseConstants.TEACHER_STATUS, default='Published', max_length=100)
     featured = models.BooleanField(default=False)
     course_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     slug = models.SlugField(unique=True, null=True, blank=True)
