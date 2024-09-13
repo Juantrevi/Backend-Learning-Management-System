@@ -12,6 +12,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
+from decimal import Decimal
 
 import os
 from environs import Env
@@ -162,10 +163,111 @@ class CourseListAPIView(generics.ListAPIView):
 
 class CourseDetailAPIView(generics.RetrieveAPIView):
     serializer_class = api_serializer.CourseSerializer
+    # TODO: Change the permission
     permission_classes = [AllowAny]
 
     # Override the course method to get it by it's slug
     def get_object(self):
         slug = self.kwargs['slug']
-        course = api_models.Course.objects.get(slug=slug, platform_status="Published", teacher_course_status="Published")
+        course = api_models.Course.objects.get(slug=slug, platform_status="Published",
+                                               teacher_course_status="Published")
         return course
+
+
+"""
+Handles the creation and updating of cart items. 
+Provides a default implementation for 
+creating a model instance.
+
+-Class Definition: CartAPIView inherits from CreateAPIView.
+-Queryset and Serializer: Specifies the 
+    queryset and serializer class.
+-Create Method: Custom logic to handle the 
+    creation and updating of cart items based 
+    on the request data.
+"""
+# Define the CartAPIView class, which inherits from CreateAPIView
+class CartAPIView(generics.CreateAPIView):
+    # Set the queryset to all Cart objects
+    queryset = api_models.Cart.objects.all()
+    # Set the serializer class to CartSerializer
+    serializer_class = api_serializer.CartSerializer
+    # Allow any user to access this view (no authentication required)
+    permission_classes = [AllowAny]
+
+    # Override the create method to handle custom logic for creating/updating cart items
+    def create(self, request, *args, **kwargs):
+        """
+        # IMPORTANT!
+        # From the FE YOU NEED TO PASS the course_id, user_id, price,
+        country_name, cart_id in a payload to this API, something like:
+        {
+          "price": "100",
+          "country_name": "United States",
+          "cart_id": "2131241",
+          "date": "2024-09-13T23:05:32.519Z",
+          "course_id": 1,
+          "user_id": 1
+        }
+        """
+        # Extract data from the request payload
+        course_id = request.data['course_id']
+        user_id = request.data['user_id']
+        price = request.data['price']
+        country_name = request.data['country_name']
+        cart_id = request.data['cart_id']
+
+        # Retrieve the course object based on the provided course_id
+        course = api_models.Course.objects.filter(id=course_id).first()
+
+        # Retrieve the user object based on the provided user_id, if it's not "undefined"
+        if user_id != "undefined":
+            user = User.objects.filter(id=user_id).first()
+        else:
+            user = None
+
+        # Retrieve the country object based on the provided country_name
+        try:
+            country_object = api_models.Country.objects.filter(name=country_name).first()
+            country = country_object.name
+        except:
+            country_object = None
+            country = "USA"
+
+        # Calculate the tax rate based on the country object
+        if country_object:
+            tax_rate = country_object.tax_rate / 100
+        else:
+            tax_rate = 0
+
+        # Check if a cart item already exists for the given cart_id and course
+        cart = api_models.Cart.objects.filter(cart_id=cart_id, course=course).first()
+
+        if cart:
+            # If the cart item exists, update its details
+            cart.course = course
+            cart.user = user
+            cart.price = price
+            cart.tax_fee = Decimal(price) * Decimal(tax_rate)
+            cart.country = country
+            cart.cart_id = cart_id
+            cart.total = Decimal(cart.price) + Decimal(cart.tax_fee)
+            cart.save()
+
+            # Return a success response indicating the cart was updated
+            return Response({"message": "Cart updated Successfully"}, status=status.HTTP_200_OK)
+        else:
+            # If the cart item does not exist, create a new one
+            cart = api_models.Cart()
+            cart.course = course
+            cart.user = user
+            cart.price = price
+            cart.tax_fee = Decimal(price) * Decimal(tax_rate)
+            cart.country = country
+            cart.cart_id = cart_id
+            cart.total = Decimal(cart.price) + Decimal(cart.tax_fee)
+            cart.save()
+
+            # Return a success response indicating the cart was created
+            return Response({"message": "Cart created Successfully"}, status=status.HTTP_201_CREATED)
+# generics. -> ListAPIView, RetrieveAPIView, CreateAPIView
