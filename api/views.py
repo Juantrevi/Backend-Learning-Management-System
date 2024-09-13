@@ -78,7 +78,7 @@ class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
             user.save()
 
             # Create a link for the password reset page with the OTP, UUID, and refresh token as query parameters
-            link = f"{env('ROOT_URL')}/create-new-password/?otp={user.otp}&uuidb64={uuidb64}&refresh_token={refresh_token}"
+            link = f"{env('FRONT_END_ROUTE_URL')}/create-new-password/?otp={user.otp}&uuidb64={uuidb64}&refresh_token={refresh_token}"
 
             # Prepare the data to be used in the email template
             merge_data = {
