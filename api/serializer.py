@@ -216,7 +216,7 @@ class CourseSerializer(serializers.ModelSerializer):
     lectures = VariantItemSerializer(many=True)
 
     class Meta:
-        fields = {
+        fields = [
             # fields
             'category',
             'teacher',
@@ -239,6 +239,6 @@ class CourseSerializer(serializers.ModelSerializer):
             'lectures',
             'average_rating',
             'rating_count',
-            'reviews',
-        }
+            'reviews'
+        ]
         model = api_models.Course

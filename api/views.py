@@ -1,24 +1,21 @@
 import random
-
-from django.shortcuts import render
-from rest_framework.response import Response
-
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
-
-from api import serializer as api_serializer
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework import generics, status
-
-from userauths.models import User, Profile
-from rest_framework.permissions import AllowAny
-
 from django.conf import settings
 
+from api import serializer as api_serializer
+from userauths.models import User, Profile
+from api import models as api_models
+
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework import generics, status
+from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.response import Response
 
 import os
 from environs import Env
+
 env = Env()
 env.read_env()
 
@@ -147,3 +144,28 @@ class PasswordChangeAPIView(generics.CreateAPIView):
         else:
             # Return an error message if the user does not exist
             return Response({"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class CategoryListAPIView(generics.ListAPIView):
+    queryset = api_models.Category.objects.filter(active=True)
+    serializer_class = api_serializer.CategorySerializer
+    # TODO: Change the permission
+    permission_classes = [AllowAny]
+
+
+class CourseListAPIView(generics.ListAPIView):
+    queryset = api_models.Course.objects.filter(platform_status="Published", teacher_course_status="Published")
+    serializer_class = api_serializer.CourseSerializer
+    # TODO: Change the permission
+    permission_classes = [AllowAny]
+
+
+class CourseDetailAPIView(generics.RetrieveAPIView):
+    serializer_class = api_serializer.CourseSerializer
+    permission_classes = [AllowAny]
+
+    # Override the course method to get it by it's slug
+    def get_object(self):
+        slug = self.kwargs['slug']
+        course = api_models.Course.objects.get(slug=slug, platform_status="Published", teacher_course_status="Published")
+        return course
