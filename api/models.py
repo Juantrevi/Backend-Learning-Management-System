@@ -237,6 +237,7 @@ class CartOrderItem(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='order_item')
     order = models.ForeignKey(CartOrder, on_delete=models.CASCADE)
     tax_fee = models.DecimalField(max_digits=12, default=0.0, decimal_places=2)
+    price = models.DecimalField(max_digits=12, default=0.0, decimal_places=2)
     total = models.DecimalField(max_digits=12, default=0.0, decimal_places=2)
     initial_total = models.DecimalField(max_digits=12, default=0.0, decimal_places=2)
     saved = models.DecimalField(max_digits=12, default=0.0, decimal_places=2)
