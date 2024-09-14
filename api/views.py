@@ -186,6 +186,8 @@ creating a model instance.
     creation and updating of cart items based 
     on the request data.
 """
+
+
 # Define the CartAPIView class, which inherits from CreateAPIView
 class CartAPIView(generics.CreateAPIView):
     # Set the queryset to all Cart objects
@@ -270,6 +272,8 @@ class CartAPIView(generics.CreateAPIView):
 
             # Return a success response indicating the cart was created
             return Response({"message": "Cart created Successfully"}, status=status.HTTP_201_CREATED)
+
+
 # generics. -> ListAPIView, RetrieveAPIView, CreateAPIView
 
 
@@ -279,7 +283,6 @@ class CartListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         cart_id = self.kwargs['cart_id']
-
         queryset = api_models.Cart.objects.filter(cart_id=cart_id)
         return queryset
 
@@ -296,4 +299,53 @@ class CartItemDeleteAPIView(generics.DestroyAPIView):
         item_id = self.kwargs['item_id']
 
         return api_models.Cart.objects.filter(cart_id=cart_id, id=item_id).first()
+
+
+# Cart Statistics API View
+class CartStatsAPIView(generics.RetrieveAPIView):
+    serializer_class = api_serializer.CartSerializer
+    permission_classes = [AllowAny]
+    # This API by default will be expecting this field
+    lookup_field = 'cart_id'
+
+    @staticmethod
+    def calculate_price(cart_item):
+        return cart_item.price
+
+    @staticmethod
+    def calculate_tax(cart_item):
+        return cart_item.tax_fee
+
+    @staticmethod
+    def calculate_total(cart_item):
+        return cart_item.total
+
+    def get_queryset(self):
+        cart_id = self.kwargs['cart_id']
+        queryset = api_models.Cart.objects.filter(cart_id=cart_id)
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        total_price = 0.00
+        total_tax = 0.00
+        total_total = 0.00
+
+        """
+        Accumulative sums for all the cart
+        Total + tax + Total    
+        """
+        for cart_item in queryset:
+            total_price += float(self.calculate_price(cart_item))
+            total_tax += float(self.calculate_tax(cart_item))
+            total_total += round(float(self.calculate_total(cart_item)), 2) #Round to 2 decimal places
+
+        data = {
+            "price": total_price,
+            "tax": total_tax,
+            "total": total_total
+        }
+
+        return Response(data, status.HTTP_200_OK)
 
