@@ -20,29 +20,47 @@ from environs import Env
 env = Env()
 env.read_env()
 
+"""
+List of the generic views provided by Django REST Framework and the HTTP methods they correspond to:
+    ListAPIView: GET
+    RetrieveAPIView: GET
+    CreateAPIView: POST
+    UpdateAPIView: PUT, PATCH
+    DestroyAPIView: DELETE
+    ListCreateAPIView: GET, POST
+    RetrieveUpdateAPIView: GET, PUT, PATCH
+    RetrieveDestroyAPIView: GET, DELETE
+    RetrieveUpdateDestroyAPIView: GET, PUT, PATCH, DELETE
+"""
 
-# This view is used to obtain JSON Web Tokens (JWT)
-# for user authentication. It uses a custom serializer
-# to include additional user information in the token.
+
+# UTILITY FUNCTIONS
+def generate_random_otp(length=7):
+    otp = ''.join([str(random.randint(0, 9)) for _ in range(length)])
+    return otp
+
+
 class MyTokenObtainPairView(TokenObtainPairView):
+    """
+        This view is used to obtain JSON Web Tokens (JWT)
+        for user authentication. It uses a custom serializer
+        to include additional user information in the token.
+    """
     # Specify the custom serializer to use for this view
     serializer_class = api_serializer.MyTokenObtainPairSerializer
 
 
-# handles user registration. It allows anyone
-# to create a new user account by providing
-# the necessary information
 class RegisterView(generics.CreateAPIView):
+    """
+        Handles user registration. It allows anyone
+        to create a new user account by providing
+        the necessary information
+    """
     queryset = User.objects.all()
     # Allow any user to access this view (no authentication required)
     permission_classes = [AllowAny]
     # Specify the serializer to use for this view
     serializer_class = api_serializer.RegisterSerializer
-
-
-def generate_random_otp(length=7):
-    otp = ''.join([str(random.randint(0, 9)) for _ in range(length)])
-    return otp
 
 
 class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
@@ -310,6 +328,8 @@ Passing the cart_id by parameter, it gives back:
   "total": 2420
 }
 """
+
+
 class CartStatsAPIView(generics.RetrieveAPIView):
     serializer_class = api_serializer.CartSerializer
     permission_classes = [AllowAny]
@@ -368,6 +388,8 @@ The Payload fot this endpoint should be:
     "user_id": "1"
 }
 """
+
+
 class CreateOrderAPIView(generics.CreateAPIView):
     serializer_class = api_serializer.CartOrderSerializer
     permission_classes = [AllowAny]
@@ -424,5 +446,3 @@ class CreateOrderAPIView(generics.CreateAPIView):
         order.save()
 
         return Response({"message": "Order created successfully"}, status.HTTP_201_CREATED)
-
-

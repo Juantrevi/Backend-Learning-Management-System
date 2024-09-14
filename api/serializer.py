@@ -1,3 +1,6 @@
+import random
+
+from django.db.utils import IntegrityError
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, AuthUser
 from rest_framework_simplejwt.tokens import Token
@@ -7,10 +10,12 @@ from api import models as api_models
 from userauths.models import User, Profile
 
 
-# This custom serializer allows you to include additional
-# user information in the JWT token, which can be useful
-# for client-side applications that need to display user details.
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+        This custom serializer allows you to include additional
+        user information in the JWT token, which can be useful
+        for client-side applications that need to display user details.
+    """
 
     # Override the get_token method to customize the token payload
     @classmethod
@@ -26,16 +31,21 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
 
-# This class inherits from serializers.ModelSerializer and is used to handle user registration.
 class RegisterSerializer(serializers.ModelSerializer):
+    """
+        Class used to register a new user
+        inherits from serializers.ModelSerializer
+    """
     # Define two password fields, one for the password and one for confirmation
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
 
     # Meta class to specify the model and fields to be used
     class Meta:
-        model = User  # Use the custom User model
-        fields = ['full_name', 'email', 'password', 'password2']  # Fields to be included in the serializer
+        # Use the custom User model
+        model = User
+        # Fields to be included in the serializer
+        fields = ['full_name', 'email', 'password', 'password2']
 
     # Validate method to check if the passwords match
     def validate(self, attr):
@@ -43,27 +53,29 @@ class RegisterSerializer(serializers.ModelSerializer):
         if attr['password'] != attr['password2']:
             # Raise a validation error if the passwords do not match
             raise serializers.ValidationError({"password": "Password fields do not match"})
-        return attr  # Return the validated data
+        return attr
 
-    # Creates a new user with the provided data.
-    # It sets the username to the part of the email
-    # before the "@" symbol and sets the user's password.
-    # Finally, it saves the user to the database and returns
-    # the created user
     def create(self, validated_data):
+        """
+            Creates a new user with the provided data.
+            It sets the username to the part of the email
+            before the "@" symbol and sets the user's password.
+            Finally, it saves the user to the database and returns
+            the created user
+        """
+        # Extract the part before the "@" symbol from the email to use as the username
+        email_username, _ = validated_data['email'].split('@')
         # Create a new user with the provided full name and email
         user = User.objects.create(
             full_name=validated_data['full_name'],
             email=validated_data['email'],
+            username=f"{email_username}{random.randint(1000, 9999)}"
         )
 
-        # Extract the part before the "@" symbol from the email to use as the username
-        email_username, _ = user.email.split('@')
-        user.username = email_username  # Set the username
-        user.set_password(validated_data['password'])  # Set the user's password
-        user.save()  # Save the user to the database
+        user.set_password(validated_data['password'])
+        user.save()
 
-        return user  # Return the created user
+        return user
 
 
 # In this example, UserSerializer and
@@ -167,6 +179,7 @@ class NoteSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     Profile = ProfileSerializer(many=False)
+
     class Meta:
         fields = '__all__'
         model = api_models.Review
