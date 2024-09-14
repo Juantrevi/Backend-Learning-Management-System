@@ -7,7 +7,9 @@ from django.db.models.signals import post_save
 class User(AbstractUser):
     username = models.CharField(unique=True, max_length=100)
     email = models.EmailField(unique=True)
-    full_name = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    full_name = models.CharField(max_length=100, null=True, blank=True)
     # One-time password (OTP) field, unique and with a maximum length of 100 characters
     otp = models.CharField(max_length=100, null=True, blank=True)
     refresh_token = models.CharField(max_length=1000, null=True, blank=True)
@@ -23,15 +25,7 @@ class User(AbstractUser):
 
     # Override the save method to set default values for full_name and username
     def save(self, *args, **kwargs):
-        # Split the email to get the part before the "@" symbol
-        email_username, full_name = self.email.split("@")
-        # If full_name is empty or None, set it to the part before the "@" symbol
-        if self.full_name == "" or self.full_name is None:
-            self.full_name = email_username
-        # If username is empty or None, set it to the part before the "@" symbol
-        if self.username == "" or self.username is None:
-            self.username = email_username
-        # Call the parent class's save method
+
         super(User, self).save(*args, **kwargs)
 
 
@@ -42,6 +36,7 @@ class Profile(models.Model):
     # File field for the profile image, with a default image and allowing null/blank values
     image = models.FileField(upload_to="user_folder", default="default-user.jpg", null=True, blank=True)
     full_name = models.CharField(max_length=100)
+    username = models.CharField(max_length=100)
     country = models.CharField(max_length=100, null=True, blank=True)
     about = models.TextField(null=True, blank=True)
     date = models.DateTimeField(auto_now=True)
@@ -53,14 +48,10 @@ class Profile(models.Model):
         else:
             return str(self.user.full_name)
 
-    # Override the save method to set default values for full_name
+    # Override the save method to set default values for full_name and username
     def save(self, *args, **kwargs):
-        # If full_name is empty or None, set it to the user's username
-        if self.user.full_name == "" or self.user.full_name is None:
-            self.full_name = self.user.username
-        else:
-            self.full_name = self.user.full_name
-        # Call the parent class's save method
+        self.full_name = self.user.full_name
+        self.username = self.user.username
         super(Profile, self).save(*args, **kwargs)
 
 

@@ -45,7 +45,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         # Use the custom User model
         model = User
         # Fields to be included in the serializer
-        fields = ['full_name', 'email', 'password', 'password2']
+        fields = ['first_name', 'last_name', 'email', 'password', 'password2']
 
     # Validate method to check if the passwords match
     def validate(self, attr):
@@ -67,7 +67,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         email_username, _ = validated_data['email'].split('@')
         # Create a new user with the provided full name and email
         user = User.objects.create(
-            full_name=validated_data['full_name'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            full_name=f"{validated_data['first_name']} {validated_data['last_name']}",
             email=validated_data['email'],
             username=f"{email_username}{random.randint(1000, 9999)}"
         )
