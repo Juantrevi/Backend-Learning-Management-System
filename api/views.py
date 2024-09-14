@@ -271,3 +271,29 @@ class CartAPIView(generics.CreateAPIView):
             # Return a success response indicating the cart was created
             return Response({"message": "Cart created Successfully"}, status=status.HTTP_201_CREATED)
 # generics. -> ListAPIView, RetrieveAPIView, CreateAPIView
+
+
+class CartListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.CartSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        cart_id = self.kwargs['cart_id']
+
+        queryset = api_models.Cart.objects.filter(cart_id=cart_id)
+        return queryset
+
+
+class CartItemDeleteAPIView(generics.DestroyAPIView):
+    serializer_class = api_serializer.CartSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        cart_id = self.kwargs['cart_id']
+        """It is just the ID of the item 
+        that we want to delete, be careful 
+        on the second parameter"""
+        item_id = self.kwargs['item_id']
+
+        return api_models.Cart.objects.filter(cart_id=cart_id, id=item_id).first()
+

@@ -198,7 +198,7 @@ class Cart(models.Model):
     tax_fee = models.DecimalField(max_digits=12, default=0.0, decimal_places=2)
     total = models.DecimalField(max_digits=12, default=0.0, decimal_places=2)
     country = models.CharField(max_length=100, null=True, blank=True)
-    cart_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
+    cart_id = ShortUUIDField(length=6, max_length=20, alphabet="1234567890")
     date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
