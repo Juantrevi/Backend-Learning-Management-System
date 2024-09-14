@@ -56,8 +56,10 @@ class Profile(models.Model):
     # Override the save method to set default values for full_name
     def save(self, *args, **kwargs):
         # If full_name is empty or None, set it to the user's username
-        if self.full_name == "" or self.full_name is None:
+        if self.user.full_name == "" or self.user.full_name is None:
             self.full_name = self.user.username
+        else:
+            self.full_name = self.user.full_name
         # Call the parent class's save method
         super(Profile, self).save(*args, **kwargs)
 
