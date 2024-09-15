@@ -6,6 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, Auth
 from rest_framework_simplejwt.tokens import Token
 from django.contrib.auth.password_validation import validate_password
 from api import models as api_models
+import re
 
 from userauths.models import User, Profile
 
@@ -49,10 +50,24 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     # Validate method to check if the passwords match
     def validate(self, attr):
+        # Transform email to lowercase
+        attr['email'] = attr['email'].lower()
+
+        # Check for blank spaces in the password
+        if ' ' in attr['password']:
+            raise serializers.ValidationError({"password": "Password should not contain spaces"})
+
+        # Correct the name fields
+        for field in ['first_name', 'last_name']:
+            # Remove leading and trailing spaces, and ensure only one space between words
+            attr[field] = re.sub(r'\s+', ' ', attr[field].strip())
+            # Capitalize the first letter of each word
+            attr[field] = ' '.join(word.capitalize() for word in attr[field].split(' '))
+
         # Check if the two password fields match
         if attr['password'] != attr['password2']:
-            # Raise a validation error if the passwords do not match
             raise serializers.ValidationError({"password": "Password fields do not match"})
+
         return attr
 
     def create(self, validated_data):
@@ -65,6 +80,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         """
         # Extract the part before the "@" symbol from the email to use as the username
         email_username, _ = validated_data['email'].split('@')
+
         # Create a new user with the provided full name and email
         user = User.objects.create(
             first_name=validated_data['first_name'],
