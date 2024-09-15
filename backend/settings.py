@@ -13,9 +13,9 @@ from datetime import timedelta
 from pathlib import Path
 import os
 from environs import Env
+
 env = Env()
 env.read_env()
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     # Third Party Apps
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
-    'corsheaders',  # To allow requests from all origins, like an application from react or angular
+    'corsheaders',  # To allow requests from all origins, like an application from React or angular
     'anymail',
     'drf_yasg'
     # 'storages',
@@ -61,7 +61,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'corsheaders.middleware.CorsMiddleware',# Add CORSHeader Below
+    'corsheaders.middleware.CorsMiddleware',  # Add CORSHeader Below
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -100,6 +100,7 @@ DATABASES = {
     }
 }
 
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -117,7 +118,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -259,5 +259,3 @@ ANYMAIL = {
     "MAILGUN_API_KEY": env('MAILGUN_API_KEY'),
     "MAILGUN_SENDER_DOMAIN": env('MAILGUN_SENDER_DOMAIN')
 }
-
-
