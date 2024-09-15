@@ -13,7 +13,6 @@ from datetime import timedelta
 from pathlib import Path
 import os
 from environs import Env
-from api.exception_handler import custom_exception_handler
 env = Env()
 env.read_env()
 
