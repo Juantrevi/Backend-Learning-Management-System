@@ -143,7 +143,7 @@ class PasswordChangeAPIView(generics.CreateAPIView):
         # Extract the data from the request
         payload = request.data
 
-        # Get the OTP, UUID, and new password from the payload
+        # Get the OTP, UUID, and new password from the payload (EXPECTED FROM THE FRONTEND)
         otp = payload['otp']
         uuidb64 = payload['uuidb64']
         password = payload['password']
@@ -455,4 +455,61 @@ class CheckOutAPIView(generics.RetrieveAPIView):
     lookup_field = 'oid'
 
 
+class CouponApplyAPIView(generics.CreateAPIView):
+    """
+    Payload:
+    {
+      "order_oid": "473040",
+      "coupon_code": "CODE3"
+    }
+    """
+    serializer_class = api_serializer.CouponSerializer
+    permission_classes = [AllowAny]
 
+    def create(self, request, *args, **kwargs):
+        order_oid = request.data['order_oid']
+        coupon_code = request.data['coupon_code']
+
+        order = api_models.CartOrder.objects.get(oid=order_oid)
+        coupon = api_models.Coupon.objects.get(code=coupon_code)
+
+
+        """Check that the student can't make an 
+        infinite number of uses for the coupon and 
+        purchase course for 0.00"""
+        # Check i coupon exists
+        if coupon:
+            # If exists bring the items from the order
+            order_items = api_models.CartOrderItem.objects.filter(order=order, teacher=coupon.teacher)
+            # Loop the items and check if the coupon has been already applied
+            for i in order_items:
+                # Check if the coupon does not exist in this specific cart order
+                if not coupon in i.coupons.all():
+                    discount = i.total * coupon.discount / 100
+
+                    # Remove the discount from the total,
+                    # the price and adding the discount to the saved
+                    # (How much money the user saved)
+                    i.total -= discount
+                    i.price -= discount
+                    i.saved += discount
+                    i.applied_coupon = True
+
+                    # Add this coupon to the coupon lists
+                    i.coupons.add(coupon)
+
+                    # Saving the coupon to the order
+                    order.coupons.add(coupon)
+                    order.total -= discount
+                    order.sub_total -= discount
+                    order.saved += discount
+
+                    i.save()
+                    order.save()
+                    coupon.used_by.add(order.student)
+
+                    return Response({'message': 'Coupon found and activated'}, status.HTTP_201_CREATED)
+                else:
+                    return Response({'message': 'Coupon already applied'}, status.HTTP_200_OK)
+        else:
+            return Response({'message': 'Coupon not found'}, status.HTTP_404_NOT_FOUND)
