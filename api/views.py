@@ -385,7 +385,7 @@ The Payload fot this endpoint should be:
     "email": "juantrevi70@gmail.com",
     "country": "Argentina",
     "cart_id": "548464",
-    "user_id": "1"
+    "user_id": 1
 }
 """
 
@@ -446,3 +446,13 @@ class CreateOrderAPIView(generics.CreateAPIView):
         order.save()
 
         return Response({"message": "Order created successfully"}, status.HTTP_201_CREATED)
+
+
+class CheckOutAPIView(generics.RetrieveAPIView):
+    serializer_class = api_serializer.CartOrderSerializer
+    queryset = api_models.CartOrder.objects.all()
+    permission_classes = [AllowAny]
+    lookup_field = 'oid'
+
+
+
