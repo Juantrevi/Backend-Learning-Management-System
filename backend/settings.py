@@ -249,11 +249,20 @@ SIMPLE_JWT = {
 # Set coresheader to allow all origin
 CORS_ALLOW_ALL_ORIGINS = True
 
+# # Alternatively, you can specify allowed origins
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5173"
+# ]
+
 # Mailgun config
 MAILGUN_API_KEY = env('MAILGUN_API_KEY')
 MAILGUN_SENDER_DOMAIN = env('MAILGUN_SENDER_DOMAIN')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
-EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
+EMAIL_BACKEND = env('EMAIL_BACKEND')
+
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY')
+FRONT_END_ROUTE_URL = env('FRONT_END_ROUTE_URL')
+
 
 ANYMAIL = {
     "MAILGUN_API_KEY": env('MAILGUN_API_KEY'),

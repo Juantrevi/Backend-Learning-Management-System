@@ -1,5 +1,6 @@
 import random
 from django.core.mail import EmailMultiAlternatives
+from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.conf import settings
 
@@ -13,12 +14,15 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from decimal import Decimal
+import stripe
 
 import os
 from environs import Env
 
 env = Env()
 env.read_env()
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 """
 List of the generic views provided by Django REST Framework and the HTTP methods they correspond to:
@@ -473,7 +477,6 @@ class CouponApplyAPIView(generics.CreateAPIView):
         order = api_models.CartOrder.objects.get(oid=order_oid)
         coupon = api_models.Coupon.objects.get(code=coupon_code)
 
-
         """Check that the student can't make an 
         infinite number of uses for the coupon and 
         purchase course for 0.00"""
@@ -513,3 +516,45 @@ class CouponApplyAPIView(generics.CreateAPIView):
                     return Response({'message': 'Coupon already applied'}, status.HTTP_200_OK)
         else:
             return Response({'message': 'Coupon not found'}, status.HTTP_404_NOT_FOUND)
+
+
+class StripeCheckoutAPIView(generics.CreateAPIView):
+    serializer_class = api_serializer.CartOrderSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+
+        order_oid = self.kwargs['order_oid']
+        order = api_models.CartOrder.objects.get(oid=order_oid)
+
+        if not order:
+            return Response({'message': 'Order Not Found'}, status.HTTP_404_NOT_FOUND)
+
+        try:
+            checkout_session = stripe.checkout.Session.create(
+                customer_email=order.email,
+                payment_method_types=['card'],
+                line_items=[
+                    {
+                        'price_data': {
+                            'currency': 'eur',
+                            'product_data': {
+                                'name': order.full_name,
+                            },
+                            'unit_amount': int(order.total * 100)
+                        },
+                        'quantity': 1
+                    }
+                ],
+                mode='payment',
+                success_url=settings.FRONT_END_ROUTE_URL + '/payment-success/' + order.oid + '?session_id={CHECKOUT_SESSION_ID}',
+                cancel_url=settings.FRONT_END_ROUTE_URL + '/payment-failed/'
+            )
+
+            order.stripe_session_id = checkout_session.id
+            order.save()
+
+            # return redirect(checkout_session.url)
+            return Response({'message': checkout_session.url})
+        except stripe.error.StripeError as e:
+            return Response({'message': f'Something went wrong with the payment. Error: {str(e)}'})
