@@ -44,5 +44,6 @@ class CourseConstants:
         ("New Question", "New Question"),
         ("New Question", "New Question"),
         ("Course Published", "Course Published"),
+        ("Course Enrollment Completed", "Course Enrollment Completed"),
 
     )

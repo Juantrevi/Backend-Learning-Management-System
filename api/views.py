@@ -200,6 +200,23 @@ class CourseDetailAPIView(generics.RetrieveAPIView):
         return course
 
 
+class SearchCourseAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.CourseSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        query = self.request.GET.get('query')
+        """Returning:
+            If we have a course called 'learn LMS Systems with django and react'
+            and we just put 'learn LMS' it'll bring the courses that CONTAINS
+            part of the query
+        """
+        return api_models.Course.objects.filter(
+            title__icontains=query,
+            platform_status="Published",
+            teacher_course_status="Published"
+        )
+
 """
 Handles the creation and updating of cart items. 
 Provides a default implementation for 
@@ -608,6 +625,27 @@ class PaymentSuccessAPIView(generics.CreateAPIView):
                     if order.payment_status == 'Processing':
                         order.payment_status = "Paid"
                         order.save()
+                        # Create a notification for the user
+                        api_models.Notification.objects.create(
+                            user=order.student,
+                            order=order,
+                            type="Course Enrollment Completed"
+                        )
+                        # Create a notification for ALL teachers in the order
+                        for i in order_items:
+                            api_models.Notification.objects.create(
+                                teacher=i.teacher,
+                                order=order,
+                                order_item=i,
+                                type="New Order"
+                            )
+                            api_models.EnrolledCourse.objects.create(
+                                course=i.course,
+                                user=order.student,
+                                teacher=i.teacher,
+                                order_item=i
+                            )
+
                         return Response({'message': 'Payment Successful'})
 
                     else:
@@ -624,6 +662,25 @@ class PaymentSuccessAPIView(generics.CreateAPIView):
                 if order.payment_status == 'Processing':
                     order.payment_status = "Paid"
                     order.save()
+                    api_models.Notification.objects.create(
+                        user=order.student,
+                        order=order,
+                        type="Course Enrollment Completed"
+                    )
+                    # Create a notification for ALL teachers in the order
+                    for i in order_items:
+                        api_models.Notification.objects.create(
+                            teacher=i.teacher,
+                            order=order,
+                            order_item=i,
+                            type="New Order"
+                        )
+                        api_models.EnrolledCourse.objects.create(
+                            course=i.course,
+                            user=order.student,
+                            teacher=i.teacher,
+                            order_item=i
+                        )
                     return Response({'message': 'Payment Successful'})
                 else:
                     return Response({'message': 'Already Paid'})
