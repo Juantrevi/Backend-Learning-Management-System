@@ -217,22 +217,20 @@ class SearchCourseAPIView(generics.ListAPIView):
             teacher_course_status="Published"
         )
 
-"""
-Handles the creation and updating of cart items. 
-Provides a default implementation for 
-creating a model instance.
 
--Class Definition: CartAPIView inherits from CreateAPIView.
--Queryset and Serializer: Specifies the 
-    queryset and serializer class.
--Create Method: Custom logic to handle the 
-    creation and updating of cart items based 
-    on the request data.
-"""
-
-
-# Define the CartAPIView class, which inherits from CreateAPIView
 class CartAPIView(generics.CreateAPIView):
+    """
+    Handles the creation and updating of cart items.
+    Provides a default implementation for
+    creating a model instance.
+
+    -Class Definition: CartAPIView inherits from CreateAPIView.
+    -Queryset and Serializer: Specifies the
+        queryset and serializer class.
+    -Create Method: Custom logic to handle the
+        creation and updating of cart items based
+        on the request data.
+    """
     # Set the queryset to all Cart objects
     queryset = api_models.Cart.objects.all()
     # Set the serializer class to CartSerializer
@@ -317,9 +315,6 @@ class CartAPIView(generics.CreateAPIView):
             return Response({"message": "Cart created Successfully"}, status=status.HTTP_201_CREATED)
 
 
-# generics. -> ListAPIView, RetrieveAPIView, CreateAPIView
-
-
 class CartListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.CartSerializer
     permission_classes = [AllowAny]
@@ -344,18 +339,15 @@ class CartItemDeleteAPIView(generics.DestroyAPIView):
         return api_models.Cart.objects.filter(cart_id=cart_id, id=item_id).first()
 
 
-# Cart Statistics API View
-"""
-Passing the cart_id by parameter, it gives back:
-{
-  "price": 2000,
-  "tax": 420,
-  "total": 2420
-}
-"""
-
-
 class CartStatsAPIView(generics.RetrieveAPIView):
+    """
+    Passing the cart_id by parameter, it gives back:
+    {
+      "price": 2000,
+      "tax": 420,
+      "total": 2420
+    }
+    """
     serializer_class = api_serializer.CartSerializer
     permission_classes = [AllowAny]
     # This API by default will be expecting this field
@@ -403,19 +395,17 @@ class CartStatsAPIView(generics.RetrieveAPIView):
         return Response(data, status.HTTP_200_OK)
 
 
-"""
-The Payload fot this endpoint should be:
-{
-    "full_name": "Juan Manuel Treviranus",
-    "email": "juantrevi70@gmail.com",
-    "country": "Argentina",
-    "cart_id": "548464",
-    "user_id": 1
-}
-"""
-
-
 class CreateOrderAPIView(generics.CreateAPIView):
+    """
+    The Payload fot this endpoint should be:
+    {
+        "full_name": "Juan Manuel Treviranus",
+        "email": "juantrevi70@gmail.com",
+        "country": "Argentina",
+        "cart_id": "548464",
+        "user_id": 1
+    }
+    """
     serializer_class = api_serializer.CartOrderSerializer
     permission_classes = [AllowAny]
     queryset = api_models.CartOrder.objects.all()
@@ -686,6 +676,3 @@ class PaymentSuccessAPIView(generics.CreateAPIView):
                     return Response({'message': 'Already Paid'})
             else:
                 return Response({'message': 'Payment Failed'})
-
-
-
