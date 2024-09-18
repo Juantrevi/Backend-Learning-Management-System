@@ -196,7 +196,7 @@ class NoteSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    Profile = ProfileSerializer(many=False)
+    profile = ProfileSerializer(many=False)
 
     class Meta:
         fields = '__all__'
@@ -261,6 +261,7 @@ class CourseSerializer(serializers.ModelSerializer):
     students = EnrolledCourseSerializer(many=True)
     curriculum = VariantItemSerializer(many=True)
     lectures = VariantItemSerializer(many=True)
+    reviews = ReviewSerializer(many=True)
 
     class Meta:
         fields = [
