@@ -5,6 +5,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.conf import settings
+from django.db.models import Avg
 
 from api import serializer as api_serializer
 from userauths.models import User, Profile
@@ -186,6 +187,18 @@ class CourseListAPIView(generics.ListAPIView):
     # TODO: Change the permission
     permission_classes = [AllowAny]
 
+
+class BestCoursesListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.CourseSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        return api_models.Course.objects.filter(
+            platform_status="Published",
+            teacher_course_status="Published"
+        ).annotate(
+            avg_rating=Avg('review__rating')
+        ).order_by('-avg_rating')[:4]
 
 class CourseDetailAPIView(generics.RetrieveAPIView):
     serializer_class = api_serializer.CourseSerializer

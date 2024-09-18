@@ -262,6 +262,7 @@ class CourseSerializer(serializers.ModelSerializer):
     curriculum = VariantItemSerializer(many=True)
     lectures = VariantItemSerializer(many=True)
     reviews = ReviewSerializer(many=True)
+    average_rating = serializers.SerializerMethodField()
 
     class Meta:
         fields = [
@@ -302,3 +303,6 @@ class CourseSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 3
+
+    def get_average_rating(self, obj):
+        return obj.average_rating()
