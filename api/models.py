@@ -100,7 +100,9 @@ class Course(models.Model):
 
     def average_rating(self):
         average_rating = Review.objects.filter(course=self, active=True).aggregate(avg_rating=models.Avg('rating'))
-        return average_rating['avg_rating']
+        if average_rating['avg_rating'] is not None:
+            return round(average_rating['avg_rating'], 1)
+        return None
 
     def rating_count(self):
         return Review.objects.filter(course=self, active=True).count()
