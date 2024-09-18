@@ -191,6 +191,8 @@ class CourseListAPIView(generics.ListAPIView):
 class BestCoursesListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.CourseSerializer
     permission_classes = [AllowAny]
+    # TODO: Make the logic so it brings not only
+    #   by rating but a mix between rating and number of reviews
 
     def get_queryset(self):
         return api_models.Course.objects.filter(
