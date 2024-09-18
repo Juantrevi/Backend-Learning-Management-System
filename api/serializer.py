@@ -239,9 +239,25 @@ class EnrolledCourseSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = api_models.EnrolledCourse
 
+    def __init__(self, *args, **kwargs):
+        """This method ensures that when I serialize
+        a Course object, the related Teacher object is
+        included in the serialized data, allowing to
+         see the teacher's name in the frontend."""
+        super(EnrolledCourseSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+
 
 class CourseSerializer(serializers.ModelSerializer):
     # students will become an array of students
+    """CourseSerializer class is a model serializer
+     for the Course model, which includes various fields
+      and related objects."""
+
     students = EnrolledCourseSerializer(many=True)
     curriculum = VariantItemSerializer(many=True)
     lectures = VariantItemSerializer(many=True)
@@ -273,3 +289,15 @@ class CourseSerializer(serializers.ModelSerializer):
             'reviews'
         ]
         model = api_models.Course
+
+    def __init__(self, *args, **kwargs):
+        """This method ensures that when I serialize
+        a Course object, the related Teacher object is
+        included in the serialized data, allowing to
+         see the teacher's name in the frontend."""
+        super(CourseSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
