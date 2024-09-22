@@ -14,7 +14,7 @@ from api import models as api_models
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, Token
 from rest_framework.response import Response
 from decimal import Decimal
 import stripe
@@ -191,6 +191,7 @@ class CourseListAPIView(generics.ListAPIView):
 class BestCoursesListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.CourseSerializer
     permission_classes = [AllowAny]
+
     # TODO: Make the logic so it brings not only
     #   by rating but a mix between rating and number of reviews
 
@@ -201,6 +202,7 @@ class BestCoursesListAPIView(generics.ListAPIView):
         ).annotate(
             avg_rating=Avg('review__rating')
         ).order_by('-avg_rating')[:4]
+
 
 class CourseDetailAPIView(generics.RetrieveAPIView):
     serializer_class = api_serializer.CourseSerializer
@@ -233,11 +235,20 @@ class SearchCourseAPIView(generics.ListAPIView):
         )
 
 
+
 class CartAPIView(generics.CreateAPIView):
     """
     Handles the creation and updating of cart items.
     Provides a default implementation for
     creating a model instance.
+
+    {
+          "course_id": 1,
+          "user_id": 1,
+          "price": "100",
+          "country_name": "United States",
+          "cart_id": "423432"
+    }
 
     -Class Definition: CartAPIView inherits from CreateAPIView.
     -Queryset and Serializer: Specifies the
@@ -260,12 +271,11 @@ class CartAPIView(generics.CreateAPIView):
         # From the FE YOU NEED TO PASS the course_id, user_id, price,
         country_name, cart_id in a payload to this API, something like:
         {
+          "course_id": 1,
+          "user_id": 1,
           "price": "100",
           "country_name": "United States",
-          "cart_id": "2131241",
-          "date": "2024-09-13T23:05:32.519Z",
-          "course_id": 1,
-          "user_id": 1
+          "cart_id": "423432"
         }
         """
         # Extract data from the request payload

@@ -162,11 +162,35 @@ class CartSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = api_models.Cart
 
+    def __init__(self, *args, **kwargs):
+        """This method ensures that when I serialize
+        a Course object, the related Teacher object is
+        included in the serialized data, allowing to
+         see the teacher's name in the frontend."""
+        super(CartSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+
 
 class CartOrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = api_models.CartOrderItem
+
+    def __init__(self, *args, **kwargs):
+        """This method ensures that when I serialize
+        a Course object, the related Teacher object is
+        included in the serialized data, allowing to
+         see the teacher's name in the frontend."""
+        super(CartOrderItemSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
 
 
 class CartOrderSerializer(serializers.ModelSerializer):
@@ -175,6 +199,18 @@ class CartOrderSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = api_models.CartOrder
+
+    def __init__(self, *args, **kwargs):
+        """This method ensures that when I serialize
+        a Course object, the related Teacher object is
+        included in the serialized data, allowing to
+         see the teacher's name in the frontend."""
+        super(CartOrderSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
 
 
 class CertificateSerializer(serializers.ModelSerializer):
@@ -267,6 +303,7 @@ class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         fields = [
             # fields
+            'id',
             'category',
             'teacher',
             'image',
