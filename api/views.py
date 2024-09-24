@@ -236,7 +236,6 @@ class SearchCourseAPIView(generics.ListAPIView):
         )
 
 
-
 class CartAPIView(generics.CreateAPIView):
     """
     Handles the creation and updating of cart items.
@@ -561,11 +560,12 @@ class CouponApplyAPIView(generics.CreateAPIView):
                     order.save()
                     coupon.used_by.add(order.student)
 
-                    return Response({'message': 'Coupon found and activated'}, status.HTTP_201_CREATED)
+                    return Response({'message': 'Coupon found and activated', "icon": "success"},
+                                    status.HTTP_201_CREATED)
                 else:
-                    return Response({'message': 'Coupon already applied'}, status.HTTP_200_OK)
+                    return Response({'message': 'Coupon already applied', "icon": "warning"}, status.HTTP_200_OK)
         else:
-            return Response({'message': 'Coupon not found'}, status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'Coupon not found', "icon": "error"}, status.HTTP_404_NOT_FOUND)
 
 
 class StripeCheckoutAPIView(generics.CreateAPIView):
@@ -573,12 +573,11 @@ class StripeCheckoutAPIView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
-
         order_oid = self.kwargs['order_oid']
-        order = api_models.CartOrder.objects.get(oid=order_oid)
+        order = api_models.CartOrder.objects.filter(oid=order_oid).first()
 
         if not order:
-            return Response({'message': 'Order Not Found'}, status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'Order Not Found'}, status=status.HTTP_404_NOT_FOUND)
 
         try:
             checkout_session = stripe.checkout.Session.create(
@@ -602,12 +601,11 @@ class StripeCheckoutAPIView(generics.CreateAPIView):
             )
 
             order.stripe_session_id = checkout_session.id
-            # order.save()
+            order.save()
 
             return redirect(checkout_session.url)
-            # return Response({'message': checkout_session.url})
         except stripe.error.StripeError as e:
-            return Response({'message': f'Something went wrong with the payment. Error: {str(e)}'})
+            return Response({'message': f'Something went wrong with the payment. Error: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 def get_access_token(client_id, secret_key):

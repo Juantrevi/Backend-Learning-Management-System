@@ -61,7 +61,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # Add CORSHeader Below
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -249,10 +249,10 @@ SIMPLE_JWT = {
 # Set coresheader to allow all origin
 CORS_ALLOW_ALL_ORIGINS = True
 
-# # Alternatively, you can specify allowed origins
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:5173"
-# ]
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173',
+    # Add other trusted origins if needed
+]
 
 # Mailgun config
 MAILGUN_API_KEY = env('MAILGUN_API_KEY')
