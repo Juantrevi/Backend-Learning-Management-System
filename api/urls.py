@@ -12,6 +12,7 @@ urlpatterns = [
     path("user/password-change/", api_views.PasswordChangeAPIView.as_view()),
 
     # Core Endpoints
+    path("cart/all/<cart_id>/", api_views.CartOwnAPIView.as_view()),
     path("course/category/", api_views.CategoryListAPIView.as_view()),
     path("course/course-list/", api_views.CourseListAPIView.as_view()),
     path("course/best-courses/", api_views.BestCoursesListAPIView.as_view()),

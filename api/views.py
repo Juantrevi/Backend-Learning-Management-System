@@ -2,6 +2,7 @@ import random
 
 import requests
 from django.core.mail import EmailMultiAlternatives
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.conf import settings
@@ -356,12 +357,16 @@ class CartItemDeleteAPIView(generics.DestroyAPIView):
 
     def get_object(self):
         cart_id = self.kwargs['cart_id']
-        """It is just the ID of the item 
-        that we want to delete, be careful 
-        on the second parameter"""
         item_id = self.kwargs['item_id']
-
         return api_models.Cart.objects.filter(cart_id=cart_id, id=item_id).first()
+
+    def delete(self, request, *args, **kwargs):
+        cart_item = self.get_object()
+        if cart_item:
+            cart_item.delete()
+            return JsonResponse({'message': 'Item deleted'}, status=200)
+        else:
+            return JsonResponse({'message': 'Item not found'}, status=404)
 
 
 class CartStatsAPIView(generics.RetrieveAPIView):
@@ -418,6 +423,15 @@ class CartStatsAPIView(generics.RetrieveAPIView):
         }
 
         return Response(data, status.HTTP_200_OK)
+
+
+class CartOwnAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.CartSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        cart_id = self.kwargs['cart_id']
+        return api_models.Cart.objects.filter(cart_id=cart_id)
 
 
 class CreateOrderAPIView(generics.CreateAPIView):
@@ -485,7 +499,7 @@ class CreateOrderAPIView(generics.CreateAPIView):
         order.total = total_total
         order.save()
 
-        return Response({"message": "Order created successfully"}, status.HTTP_201_CREATED)
+        return Response({"message": "Order created successfully", 'order_oid': order.oid}, status.HTTP_201_CREATED)
 
 
 class CheckOutAPIView(generics.RetrieveAPIView):
