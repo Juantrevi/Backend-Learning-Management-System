@@ -613,7 +613,7 @@ def get_access_token(client_id, secret_key):
     token from the frontend using client_id
     and secret_key"""
 
-    token_url = "https://api.sandbox.paypal.com/v1/oauth/token"
+    token_url = "https://api.sandbox.paypal.com/v1/oauth2/token"
     data = {'grant_type': 'client_credentials'}
     auth = (client_id, secret_key)
     response = requests.post(token_url, data=data, auth=auth)
@@ -713,3 +713,4 @@ class PaymentSuccessAPIView(generics.CreateAPIView):
                     return Response({'message': 'Already Paid'})
             else:
                 return Response({'message': 'Payment Failed'})
+
