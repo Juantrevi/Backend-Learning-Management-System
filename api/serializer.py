@@ -131,6 +131,14 @@ class VariantItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = api_models.VariantItem
 
+    def __init__(self, *args, **kwargs):
+        super(VariantItemSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+
 
 class VariantSerializer(serializers.ModelSerializer):
     variant_items = VariantItemSerializer(many=True)
@@ -138,6 +146,14 @@ class VariantSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = api_models.Variant
+
+    def __init__(self, *args, **kwargs):
+        super(VariantSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
 
 
 class QuestionAnswerMessageSerializer(serializers.ModelSerializer):
@@ -238,6 +254,14 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = api_models.Review
 
+    def __init__(self, *args, **kwargs):
+        super(ReviewSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -266,7 +290,7 @@ class CountrySerializer(serializers.ModelSerializer):
 class EnrolledCourseSerializer(serializers.ModelSerializer):
     lectures = VariantItemSerializer(many=True, read_only=True)
     completed_lesson = CompletedLessonSerializer(many=True, read_only=True)
-    curriculum = VariantItemSerializer(many=True, read_only=True)
+    curriculum = VariantSerializer(many=True, read_only=True)
     note = NoteSerializer(many=True, read_only=True)
     question_answer = QuestionAnswerSerializer(many=True, read_only=True)
     review = ReviewSerializer(many=True, read_only=True)
@@ -294,10 +318,10 @@ class CourseSerializer(serializers.ModelSerializer):
      for the Course model, which includes various fields
       and related objects."""
 
-    students = EnrolledCourseSerializer(many=True)
-    curriculum = VariantSerializer(many=True)
-    lectures = VariantItemSerializer(many=True)
-    reviews = ReviewSerializer(many=True)
+    students = EnrolledCourseSerializer(many=True, required=False, read_only=True)
+    curriculum = VariantSerializer(many=True, required=False, read_only=True)
+    lectures = VariantItemSerializer(many=True, required=False, read_only=True)
+    reviews = ReviewSerializer(many=True, read_only=True, required=False)
     average_rating = serializers.SerializerMethodField()
 
     class Meta:

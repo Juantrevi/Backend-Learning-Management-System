@@ -9,15 +9,19 @@ from django.conf import settings
 from django.db.models import Avg
 
 from api import serializer as api_serializer
+from api.serializer import EnrolledCourseSerializer
 from userauths.models import User, Profile
 from api import models as api_models
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken, Token
 from rest_framework.response import Response
 from decimal import Decimal
+from rest_framework import generics
+from rest_framework.permissions import AllowAny
+from .models import EnrolledCourse
+from .utils import get_user_from_request
 import stripe
 
 import os
@@ -433,6 +437,18 @@ class CartOwnAPIView(generics.ListAPIView):
         return api_models.Cart.objects.filter(cart_id=cart_id)
 
 
+class EnrolledCoursesAPIView(generics.ListAPIView):
+    serializer_class = EnrolledCourseSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        user = get_user_from_request(self.request)
+        if user:
+            return EnrolledCourse.objects.filter(user=user)
+        else:
+            return EnrolledCourse.objects.none()
+
+
 class CreateOrderAPIView(generics.CreateAPIView):
     """
     The Payload fot this endpoint should be:
@@ -605,7 +621,8 @@ class StripeCheckoutAPIView(generics.CreateAPIView):
 
             return redirect(checkout_session.url)
         except stripe.error.StripeError as e:
-            return Response({'message': f'Something went wrong with the payment. Error: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': f'Something went wrong with the payment. Error: {str(e)}'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 def get_access_token(client_id, secret_key):
@@ -658,6 +675,7 @@ class PaymentSuccessAPIView(generics.CreateAPIView):
                             order=order,
                             type="Course Enrollment Completed"
                         )
+
                         # Create a notification for ALL teachers in the order
                         for i in order_items:
                             api_models.Notification.objects.create(
@@ -666,6 +684,7 @@ class PaymentSuccessAPIView(generics.CreateAPIView):
                                 order_item=i,
                                 type="New Order"
                             )
+
                             api_models.EnrolledCourse.objects.create(
                                 course=i.course,
                                 user=order.student,
@@ -689,11 +708,13 @@ class PaymentSuccessAPIView(generics.CreateAPIView):
                 if order.payment_status == 'Processing':
                     order.payment_status = "Paid"
                     order.save()
+
                     api_models.Notification.objects.create(
                         user=order.student,
                         order=order,
                         type="Course Enrollment Completed"
                     )
+
                     # Create a notification for ALL teachers in the order
                     for i in order_items:
                         api_models.Notification.objects.create(
@@ -702,6 +723,7 @@ class PaymentSuccessAPIView(generics.CreateAPIView):
                             order_item=i,
                             type="New Order"
                         )
+
                         api_models.EnrolledCourse.objects.create(
                             course=i.course,
                             user=order.student,
@@ -713,4 +735,3 @@ class PaymentSuccessAPIView(generics.CreateAPIView):
                     return Response({'message': 'Already Paid'})
             else:
                 return Response({'message': 'Payment Failed'})
-
