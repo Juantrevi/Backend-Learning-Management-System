@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
+
 def get_user_from_request(request):
     token = request.COOKIES.get('access_token') or request.COOKIES.get('refresh_token')
     if not token:

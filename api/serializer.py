@@ -367,3 +367,10 @@ class CourseSerializer(serializers.ModelSerializer):
 
     def get_average_rating(self, obj):
         return obj.average_rating()
+
+
+class StudentSummarySerializer(serializers.Serializer):
+    total_courses = serializers.IntegerField(default=0)
+    completed_lessons = serializers.IntegerField(default=0)
+    achieved_certificates = serializers.IntegerField(default=0)
+    enrolled_course_ids = serializers.ListField(child=serializers.IntegerField(), default=[])

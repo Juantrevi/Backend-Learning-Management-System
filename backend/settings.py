@@ -30,6 +30,25 @@ JWT_SECRET_KEY = env('JWT_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# settings.py
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
+
 ALLOWED_HOSTS = []
 
 # Application definition
@@ -250,8 +269,10 @@ SIMPLE_JWT = {
 # Set coresheader to allow all origin
 CORS_ALLOW_ALL_ORIGINS = True
 
+CORS_ALLOW_CREDENTIALS = True
+
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:5173',
+    env('FRONT_END_ROUTE_URL'),
     # Add other trusted origins if needed
 ]
 

@@ -28,7 +28,9 @@ urlpatterns = [
     path("payment/stripe-checkout/<order_oid>/", api_views.StripeCheckoutAPIView.as_view()),
     path("payment/payment-success/", api_views.PaymentSuccessAPIView.as_view()),
 
-    # Enrolled courses
-    path('user/enrolled-courses/', api_views.EnrolledCoursesAPIView.as_view()),
+    # Students API Endpoints
+    path('student/enrolled-courses/', api_views.EnrolledCoursesAPIView.as_view()),
+    path('student/summary/<user_id>/', api_views.StudentSummaryAPIView.as_view()),
+    path('student/summary/', api_views.StudentSummaryAPIViewNoIdPass.as_view()),
 
 ]
