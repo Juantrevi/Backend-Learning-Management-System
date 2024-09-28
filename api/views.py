@@ -787,3 +787,23 @@ class StudentSummaryAPIViewNoIdPass(generics.ListAPIView):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class StudentCourseDetailAPIView(generics.RetrieveAPIView):
+    serializer_class = api_serializer.EnrolledCourseSerializer
+    permission_classes = [AllowAny]
+    lookup_field = 'enrollment_id'
+
+    def get_object(self):
+        user = get_user_from_request(self.request)
+        enrollment_id = self.kwargs['enrollment_id']
+
+        logging.debug(f"User: {user}")
+        logging.debug(f"Enrollment ID: {enrollment_id}")
+
+        if not user or not enrollment_id:
+            return []
+        else:
+            return api_models.EnrolledCourse.objects.get(user=user, enrollment_id=enrollment_id)
+
+

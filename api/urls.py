@@ -30,7 +30,8 @@ urlpatterns = [
 
     # Students API Endpoints
     path('student/enrolled-courses/', api_views.EnrolledCoursesAPIView.as_view()),
-    path('student/summary/<user_id>/', api_views.StudentSummaryAPIView.as_view()),
     path('student/summary/', api_views.StudentSummaryAPIViewNoIdPass.as_view()),
+    path('student/course-detail/<enrollment_id>/', api_views.StudentCourseDetailAPIView.as_view()),
+
 
 ]
