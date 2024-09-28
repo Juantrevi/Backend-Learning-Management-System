@@ -13,6 +13,7 @@ from api import serializer as api_serializer
 from api.serializer import EnrolledCourseSerializer
 from userauths.models import User, Profile
 from api import models as api_models
+from django.contrib.auth.hashers import check_password
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status
@@ -178,6 +179,27 @@ class PasswordChangeAPIView(generics.CreateAPIView):
         else:
             # Return an error message if the user does not exist
             return Response({"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ChangePasswordAPIView(generics.CreateAPIView):
+    serializer_class = api_serializer.UserSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        user_id = request.data['user_id']
+        old_password = request.data['old_password']
+        new_password = request.data['new_password']
+
+        user = User.objects.get(id=user_id)
+        if user is not None:
+            if check_password(old_password, user.password):
+                user.set_password(new_password)
+                user.save()
+                return Response({'message': 'Password changed successfully', 'icon': 'success'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'message': 'Old password is incorrect', 'icon': 'warning'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'message': 'User not found', 'icon': 'error'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class CategoryListAPIView(generics.ListAPIView):
@@ -840,6 +862,41 @@ class StudentCourseCompletedCreateAPIView(generics.CreateAPIView):
         else:
             api_models.CompletedLesson.objects.create(user=user, course=course, variant_item=variant_item)
             return Response({'message': 'Lesson completed'}, status=status.HTTP_201_CREATED)
+
+
+class StudentNoteCreateAPIView(generics.CreateAPIView):
+
+    """
+    Payload to be sent:
+    {
+      "enrollment_id": 691623,
+      "title": "A new Note",
+      "note":  "It is a long established
+                fact that a reader will be distracted
+                by the readable content of a page when
+                looking at its layout. The point of
+                using Lorem Ipsum is that it has a more-or
+                -less normal distribution of letters,",
+    }
+    """
+
+    serializer_class = api_serializer.NoteSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        user = get_user_from_request(request)
+        if not user:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        enrollment_id = request.data['enrollment_id']
+        title = request.data['title']
+        note = request.data['note']
+
+        enrolled = api_models.EnrolledCourse.objects.get(enrollment_id=enrollment_id)
+
+        api_models.Note.objects.create(user=user, course=enrolled.course, note=note, title=title)
+
+        return Response({'message': 'Note created successfully'}, status.HTTP_201_CREATED)
 
 
 
