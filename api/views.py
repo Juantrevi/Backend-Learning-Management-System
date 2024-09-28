@@ -807,3 +807,39 @@ class StudentCourseDetailAPIView(generics.RetrieveAPIView):
             return api_models.EnrolledCourse.objects.get(user=user, enrollment_id=enrollment_id)
 
 
+class StudentCourseCompletedCreateAPIView(generics.CreateAPIView):
+
+    """
+    Payload:
+    {
+        "course_id": 4,
+        "variant_item_id": 767990
+    }
+    """
+
+    serializer_class = api_serializer.CompletedLessonSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        user = get_user_from_request(request)
+        if not user:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        course_id = request.data['course_id']
+        variant_item_id = request.data['variant_item_id']
+
+        course = api_models.Course.objects.get(id=course_id)
+        variant_item = api_models.VariantItem.objects.get(variant_item_id=variant_item_id)
+
+        completed_lessons = api_models.CompletedLesson.objects.filter(user=user, course=course, variant_item=variant_item).first()
+
+        if completed_lessons:
+            completed_lessons.delete()
+            return Response({'message': 'Lesson not completed'}, status=status.HTTP_201_CREATED)
+
+        else:
+            api_models.CompletedLesson.objects.create(user=user, course=course, variant_item=variant_item)
+            return Response({'message': 'Lesson completed'}, status=status.HTTP_201_CREATED)
+
+
+
