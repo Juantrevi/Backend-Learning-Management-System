@@ -1,3 +1,5 @@
+import random
+
 import jwt
 import logging
 from django.conf import settings
@@ -5,6 +7,11 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
+
+
+def generate_random_otp(length=7):
+    otp = ''.join([str(random.randint(0, 9)) for _ in range(length)])
+    return otp
 
 
 def get_user_from_request(request):
