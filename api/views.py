@@ -963,9 +963,10 @@ class StudentRateCourseCreateAPIView(generics.CreateAPIView):
 
         course = api_models.Course.objects.get(course_id=course_id)
 
+        if api_models.Review.objects.filter(user=user, course=course).exists():
+            return Response({'message': 'You have already reviewed this course'})
+
         # Add active=active
         api_models.Review.objects.create(user=user, course=course, review=review, rating=rating)
 
         return Response({"message": "Review created successfully"})
-
-
