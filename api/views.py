@@ -936,3 +936,36 @@ class StudentNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         note = api_models.Note.objects.get(user=user, course=enrolled.course, id=note_id)
 
         return note
+
+
+class StudentRateCourseCreateAPIView(generics.CreateAPIView):
+    """
+    PAYLOAD
+    {
+    "course_id": 564235,
+    "rating": 4,
+    "review": "This is a great course!!",
+    }
+    OPTIONAL: "active": true
+    """
+    serializer_class = api_serializer.ReviewSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        user = get_user_from_request(self.request)
+        if not user:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        course_id = request.data['course_id']
+        rating = request.data['rating']
+        review = request.data['review']
+        # active = request.data['active']
+
+        course = api_models.Course.objects.get(course_id=course_id)
+
+        # Add active=active
+        api_models.Review.objects.create(user=user, course=course, review=review, rating=rating)
+
+        return Response({"message": "Review created successfully"})
+
+
