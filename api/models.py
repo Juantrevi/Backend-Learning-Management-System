@@ -373,7 +373,7 @@ class WishList(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.course.title
+        return f'{self.user.email} - {self.course.course_id} - {self.course.title}'
 
 
 class Country(models.Model):

@@ -8,6 +8,7 @@ from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.db.models import Avg
+from rest_framework.exceptions import NotFound
 
 from api import serializer as api_serializer
 from api.serializer import EnrolledCourseSerializer
@@ -989,6 +990,40 @@ class StudentRateCourseUpdateAPIView(generics.RetrieveUpdateAPIView):
         user = get_user_from_request(self.request)
         if not user:
             return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
         review_id = self.kwargs['review_id']
 
         return api_models.Review.objects.get(id=review_id, user=user)
+
+
+class StudentWishListListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = api_serializer.WishlistSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        user = get_user_from_request(self.request)
+        if not user:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        return api_models.WishList.objects.filter(user=user)
+
+    def create(self, request, *args, **kwargs):
+        user = get_user_from_request(self.request)
+        if not user:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        course_id = request.data['course_id']
+        course = api_models.Course.objects.get(id=course_id)
+
+        wishlist = api_models.WishList.objects.filter(user=user, course=course).first()
+
+        if wishlist:
+            wishlist.delete()
+            return Response({'message': 'Deleted from wishlist'}, status=status.HTTP_200_OK)
+        else:
+            api_models.WishList.objects.create(
+                user=user,
+                course=course
+            )
+            return Response({'message': 'Added to wishlist'}, status=status.HTTP_201_CREATED)
+
