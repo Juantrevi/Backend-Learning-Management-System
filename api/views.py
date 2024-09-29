@@ -867,7 +867,7 @@ class StudentCourseCompletedCreateAPIView(generics.CreateAPIView):
             return Response({'message': 'Lesson completed'}, status=status.HTTP_201_CREATED)
 
 
-class StudentNoteCreateAPIView(generics.CreateAPIView):
+class StudentNoteCreateAPIView(generics.ListCreateAPIView):
     """
     Payload to be sent:
     {
@@ -884,6 +884,15 @@ class StudentNoteCreateAPIView(generics.CreateAPIView):
 
     serializer_class = api_serializer.NoteSerializer
     permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        user = get_user_from_request(self.request)
+        if not user:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        enrollment_id = self.kwargs['enrollment_id']
+        enrolled = api_models.EnrolledCourse.objects.get(enrollment_id=enrollment_id)
+
+        return api_models.Note.objects.filter(user=user, course=enrolled.course)
 
     def create(self, request, *args, **kwargs):
         user = get_user_from_request(request)
