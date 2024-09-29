@@ -195,9 +195,11 @@ class ChangePasswordAPIView(generics.CreateAPIView):
             if check_password(old_password, user.password):
                 user.set_password(new_password)
                 user.save()
-                return Response({'message': 'Password changed successfully', 'icon': 'success'}, status=status.HTTP_200_OK)
+                return Response({'message': 'Password changed successfully', 'icon': 'success'},
+                                status=status.HTTP_200_OK)
             else:
-                return Response({'message': 'Old password is incorrect', 'icon': 'warning'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'message': 'Old password is incorrect', 'icon': 'warning'},
+                                status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'message': 'User not found', 'icon': 'error'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -796,7 +798,8 @@ class StudentSummaryAPIViewNoIdPass(generics.ListAPIView):
         total_courses = api_models.EnrolledCourse.objects.filter(user=user).count()
         completed_lessons = api_models.CompletedLesson.objects.filter(user=user).count()
         achieved_certificates = api_models.Certificate.objects.filter(user=user).count()
-        enrolled_course_ids = list(api_models.EnrolledCourse.objects.filter(user=user).values_list('course_id', flat=True))
+        enrolled_course_ids = list(
+            api_models.EnrolledCourse.objects.filter(user=user).values_list('course_id', flat=True))
 
         return [{
             'total_courses': total_courses,
@@ -830,7 +833,6 @@ class StudentCourseDetailAPIView(generics.RetrieveAPIView):
 
 
 class StudentCourseCompletedCreateAPIView(generics.CreateAPIView):
-
     """
     Payload:
     {
@@ -853,7 +855,8 @@ class StudentCourseCompletedCreateAPIView(generics.CreateAPIView):
         course = api_models.Course.objects.get(id=course_id)
         variant_item = api_models.VariantItem.objects.get(variant_item_id=variant_item_id)
 
-        completed_lessons = api_models.CompletedLesson.objects.filter(user=user, course=course, variant_item=variant_item).first()
+        completed_lessons = api_models.CompletedLesson.objects.filter(user=user, course=course,
+                                                                      variant_item=variant_item).first()
 
         if completed_lessons:
             completed_lessons.delete()
@@ -865,7 +868,6 @@ class StudentCourseCompletedCreateAPIView(generics.CreateAPIView):
 
 
 class StudentNoteCreateAPIView(generics.CreateAPIView):
-
     """
     Payload to be sent:
     {
@@ -899,4 +901,38 @@ class StudentNoteCreateAPIView(generics.CreateAPIView):
         return Response({'message': 'Note created successfully'}, status.HTTP_201_CREATED)
 
 
+class StudentNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    """This endpoint lets update, get or delete a particular note:
+    PUT:
+    {
+     "enrollment_id": 691623,
+     "title": "A new Note PUT",
+     "course": 4,
+     "note":  "The note"
+    }
+    PATCH:
+    {
+     "enrollment_id": 691623,
+     "title": "A new Note PUT PATCH",
+     "course": 4,
+     "note":  "The note"
+    }
+"""
+    serializer_class = api_serializer.NoteSerializer
+    permission_classes = [AllowAny]
 
+    def get_queryset(self):
+        return api_models.Note.objects.all()
+
+    def get_object(self):
+        user = get_user_from_request(self.request)
+        if not user:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        enrollment_id = self.kwargs['enrollment_id']
+        note_id = self.kwargs['note_id']
+
+        enrolled = api_models.EnrolledCourse.objects.get(enrollment_id=enrollment_id)
+        note = api_models.Note.objects.get(user=user, course=enrolled.course, id=note_id)
+
+        return note
