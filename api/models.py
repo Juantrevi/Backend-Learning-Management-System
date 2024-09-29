@@ -311,7 +311,7 @@ class EnrolledCourse(models.Model):
         return QuestionAnswer.objects.filter(course=self.course)
 
     def review(self):
-        return Review.objects.filter(course=self.course, user=self.user).first()
+        return Review.objects.filter(course=self.course, user=self.user)# .first()
 
 
 class Note(models.Model):

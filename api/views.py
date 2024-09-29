@@ -970,3 +970,16 @@ class StudentRateCourseCreateAPIView(generics.CreateAPIView):
         api_models.Review.objects.create(user=user, course=course, review=review, rating=rating)
 
         return Response({"message": "Review created successfully"})
+
+
+class StudentRateCourseUpdateAPIView(generics.RetrieveUpdateAPIView):
+    serializer_class = api_serializer.ReviewSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        user = get_user_from_request(self.request)
+        if not user:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        review_id = self.kwargs['review_id']
+
+        return api_models.Review.objects.get(id=review_id, user=user)

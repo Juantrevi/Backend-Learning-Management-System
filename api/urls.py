@@ -37,6 +37,7 @@ urlpatterns = [
     path('student/course-note/', api_views.StudentNoteCreateAPIView.as_view()),
     path('student/course-note-detail/<enrollment_id>/<note_id>/', api_views.StudentNoteDetailAPIView.as_view()),
     path('student/rate-course/', api_views.StudentRateCourseCreateAPIView.as_view()),
+    path('student/review-detail/<review_id>', api_views.StudentRateCourseUpdateAPIView.as_view()),
 
 
 ]
