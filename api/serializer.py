@@ -374,4 +374,3 @@ class StudentSummarySerializer(serializers.Serializer):
     completed_lessons = serializers.IntegerField(default=0)
     achieved_certificates = serializers.IntegerField(default=0)
     enrolled_course_ids = serializers.ListField(child=serializers.IntegerField(), default=[])
-

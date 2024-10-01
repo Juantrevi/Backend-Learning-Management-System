@@ -53,6 +53,7 @@ urlpatterns = [
     path("user/password-reset/<email>/", PasswordResetEmailVerifyAPIView.as_view()),
     path("user/password-change/", PasswordChangeAPIView.as_view()),
     path("user/change-password/", ChangePasswordAPIView.as_view()),
+    path("user/user-info/", UserDetailAPIView.as_view()),
 
     # Core Endpoints
     path("cart/all/<cart_id>/", CartOwnAPIView.as_view()),

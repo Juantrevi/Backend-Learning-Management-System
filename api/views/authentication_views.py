@@ -7,8 +7,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
+from api import models as api_models
 
-from api.utils import generate_random_otp
+from api.serializer import ProfileSerializer
+from api.utils import generate_random_otp, get_user_from_request
 from userauths.models import User
 from api import serializer as api_serializer
 from environs import Env
@@ -94,3 +96,16 @@ class ChangePasswordAPIView(generics.CreateAPIView):
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'message': 'User not found', 'icon': 'error'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class UserDetailAPIView(generics.RetrieveAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = ProfileSerializer
+
+    def get_object(self):
+        user = get_user_from_request(self.request)
+        if not user:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        profile = api_models.Profile.objects.get(user=user)
+        return profile
