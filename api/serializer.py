@@ -240,6 +240,14 @@ class CompletedLessonSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = api_models.CompletedLesson
 
+    def __init__(self, *args, **kwargs):
+        super(CompletedLessonSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+
 
 class NoteSerializer(serializers.ModelSerializer):
     class Meta:
