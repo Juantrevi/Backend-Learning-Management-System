@@ -164,14 +164,12 @@ class StudentNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     {
      "enrollment_id": 691623,
      "title": "A new Note PUT",
-     "course": 4,
      "note":  "The note"
     }
     PATCH:
     {
      "enrollment_id": 691623,
-     "title": "A new Note PUT PATCH",
-     "course": 4,
+     "title": "A new Note PUT PATCH"
      "note":  "The note"
     }
 """
@@ -190,7 +188,8 @@ class StudentNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         note_id = self.kwargs['note_id']
 
         enrolled = api_models.EnrolledCourse.objects.get(enrollment_id=enrollment_id)
-        note = api_models.Note.objects.get(user=user, course=enrolled.course, id=note_id)
+        logging.debug(f'Note id is: {note_id}')
+        note = api_models.Note.objects.get(user=user, course=enrolled.course, note_id=note_id)
 
         return note
 
