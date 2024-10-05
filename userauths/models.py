@@ -11,7 +11,7 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=100)
     full_name = models.CharField(max_length=100, null=True, blank=True)
     # One-time password (OTP) field, unique and with a maximum length of 100 characters
-    otp = models.CharField(max_length=100, null=True, blank=True)
+    otp = models.CharField(max_length=100, null=True, blank=True, )
     refresh_token = models.CharField(max_length=1000, null=True, blank=True)
 
     # Use email as the unique identifier for authentication instead of username

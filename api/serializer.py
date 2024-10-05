@@ -262,13 +262,13 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = api_models.Review
 
-    # def __init__(self, *args, **kwargs):
-    #     super(ReviewSerializer, self).__init__(*args, **kwargs)
-    #     request = self.context.get("request")
-    #     if request and request.method == "POST":
-    #         self.Meta.depth = 0
-    #     else:
-    #         self.Meta.depth = 3
+    def __init__(self, *args, **kwargs):
+        super(ReviewSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
 
 
 class NotificationSerializer(serializers.ModelSerializer):
@@ -287,6 +287,14 @@ class WishlistSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = api_models.WishList
+
+    def __init__(self, *args, **kwargs):
+        super(WishlistSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
 
 
 class CountrySerializer(serializers.ModelSerializer):
