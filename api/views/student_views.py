@@ -48,12 +48,16 @@ class StudentSummaryAPIViewNoIdPass(generics.ListAPIView):
         achieved_certificates = api_models.Certificate.objects.filter(user=user).count()
         enrolled_course_ids = list(
             api_models.EnrolledCourse.objects.filter(user=user).values_list('course_id', flat=True))
+        wishlist_course_id = list(
+            api_models.WishList.objects.filter(user=user).values_list('course_id', flat=True)
+        )
 
         return [{
             'total_courses': total_courses,
             'completed_lessons': completed_lessons,
             'achieved_certificates': achieved_certificates,
             'enrolled_course_ids': enrolled_course_ids,
+            'wishlist_course_id': wishlist_course_id
         }]
 
     def list(self, request, *args, **kwargs):
@@ -265,13 +269,13 @@ class StudentWishListListCreateAPIView(generics.ListCreateAPIView):
 
         if wishlist:
             wishlist.delete()
-            return Response({'message': 'Deleted from wishlist'}, status=status.HTTP_200_OK)
+            return Response({'icon': 'warning', 'message': 'Deleted from wishlist'}, status=status.HTTP_200_OK)
         else:
             api_models.WishList.objects.create(
                 user=user,
                 course=course
             )
-            return Response({'message': 'Added to wishlist'}, status=status.HTTP_201_CREATED)
+            return Response({'icon': 'success', 'message': 'Added to wishlist'}, status=status.HTTP_201_CREATED)
 
 
 class QuestionAndAnswerListAPIView(generics.ListCreateAPIView):
