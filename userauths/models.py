@@ -50,7 +50,8 @@ class Profile(models.Model):
 
     # Override the save method to set default values for full_name and username
     def save(self, *args, **kwargs):
-        self.full_name = self.user.full_name
+        if not self.full_name:
+            self.full_name = self.user.full_name
         self.username = self.user.username
         super(Profile, self).save(*args, **kwargs)
 

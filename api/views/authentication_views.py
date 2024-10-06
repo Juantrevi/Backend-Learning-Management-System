@@ -11,7 +11,7 @@ from api import models as api_models
 
 from api.serializer import ProfileSerializer
 from api.utils import generate_random_otp, get_user_from_request
-from userauths.models import User
+from userauths.models import User, Profile
 from api import serializer as api_serializer
 from environs import Env
 
@@ -54,7 +54,6 @@ class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
             msg.send()
             print(link)
         return user
-
 
 class PasswordChangeAPIView(generics.CreateAPIView):
     permission_classes = [AllowAny]
@@ -109,3 +108,18 @@ class UserDetailAPIView(generics.RetrieveAPIView):
 
         profile = api_models.Profile.objects.get(user=user)
         return profile
+
+
+class ProfileApiView(generics.RetrieveUpdateAPIView):
+    serializer_class = api_serializer.ProfileSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        user = get_user_from_request(self.request)
+        if not user:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Profile.objects.get(user=user)
+
+
+
+
