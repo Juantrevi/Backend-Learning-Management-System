@@ -50,7 +50,7 @@ class CartAPIView(generics.CreateAPIView):
 
 class CreateOrderAPIView(generics.CreateAPIView):
     """
-    The Payload fot this endpoint should be:
+    The Payload for this endpoint should be:
     {
         "full_name": "Juan Manuel Treviranus",
         "email": "juantrevi70@gmail.com",

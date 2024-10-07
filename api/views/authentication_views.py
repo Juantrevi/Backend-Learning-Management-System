@@ -120,6 +120,23 @@ class ProfileApiView(generics.RetrieveUpdateAPIView):
             return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         return Profile.objects.get(user=user)
 
+    # Delete the old image
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        old_image = instance.image.path if instance.image else None
+
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if old_image and 'image' in request.data:
+            import os
+            if os.path.isfile(old_image):
+                os.remove(old_image)
+
+        return Response(serializer.data)
+
 
 
 
