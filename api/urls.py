@@ -88,6 +88,15 @@ urlpatterns = [
 
     # Teacher endpoints
     path('teacher/summary/', TeacherSummaryAPIView.as_view()),
+    path('teacher/course-list/', TeacherCourseListAPIView.as_view()),
+    path('teacher/review-list/', TeacherReviewListAPIView.as_view()),
+    path('teacher/review-detail/<review_id>', TeacherReviewDetailAPIView.as_view()),
+    path('teacher/students-list/', TeacherStudentsListAPIView.as_view({'get': 'list'})),
+
+
+
+
+
 
 ]
 
