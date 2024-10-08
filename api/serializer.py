@@ -391,3 +391,10 @@ class StudentSummarySerializer(serializers.Serializer):
     achieved_certificates = serializers.IntegerField(default=0)
     enrolled_course_ids = serializers.ListField(child=serializers.IntegerField(), default=[])
     wishlist_course_id = serializers.ListField(child=serializers.IntegerField(), default=[])
+
+
+class TeacherSummarySerializer(serializers.Serializer):
+    total_courses = serializers.IntegerField(default=0)
+    total_students = serializers.IntegerField(default=0)
+    total_revenue = serializers.IntegerField(default=0)
+    monthly_revenue = serializers.IntegerField(default=0)

@@ -86,6 +86,9 @@ urlpatterns = [
     path('student/question-answer-list-create/<course_id>/', QuestionAndAnswerListAPIView.as_view()),
     path('student/question-answer-message-create/', QuestionAnswerMessageSendAPIView.as_view()),
 
+    # Teacher endpoints
+    path('teacher/summary/', TeacherSummaryAPIView.as_view()),
+
 ]
 
 
