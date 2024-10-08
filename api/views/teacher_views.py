@@ -144,16 +144,25 @@ class TeacherStudentsListAPIView(viewsets.ViewSet):
         return Response(total_students)
 
 
-@api_view({'GET'})
-def TeacherAllMonthsEarningAPIView(request, teacher_id):
-    teacher = api_models.Teacher.objects.get(id=teacher_id)
+@api_view(('GET',))
+def TeacherAllMonthsEarningAPIView(request):
+    user = get_user_from_request(request)
+    if user:
+        teacher = api_models.Teacher.objects.filter(user=user).first()
+        if not teacher:
+            raise ValueError('No teacher found')
+    else:
+        raise ValueError('No user found')
+
+    # teacher = api_models.Teacher.objects.get(id=teacher_id)
+
     monthly_earning_tracker = (
         api_models.CartOrderItem.objects
         .filter(teacher=teacher, order__payment_status='Paid')
         .annotate(
             month=ExtractMonth('date')
         )
-        .values('months')
+        .values('month')
         .annotate(
             total_earning = models.Sum('price')
         )
@@ -220,5 +229,73 @@ class TeacherQuestionAnswerListAPIView(generics.ListAPIView):
             raise ValueError('No user found')
 
         return api_models.QuestionAnswer.objects.filter(course__teacher=teacher)
+
+
+class TeacherCouponListCreateAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.CouponSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        user = get_user_from_request(self.request)
+        if user:
+            teacher = api_models.Teacher.objects.filter(user=user).first()
+            if not teacher:
+                raise ValueError('No teacher found')
+        else:
+            raise ValueError('No user found')
+
+        return api_models.Coupon.objects.filter(teacher=teacher)
+
+
+class TeacherCouponDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = api_serializer.CouponSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        user = get_user_from_request(self.request)
+        if user:
+            teacher = api_models.Teacher.objects.filter(user=user).first()
+            if not teacher:
+                raise ValueError('No teacher found')
+        else:
+            raise ValueError('No user found')
+
+        coupon_id = self.kwargs['coupon_id']
+        return api_models.Coupon.objects.get(teacher=teacher, id=coupon_id)
+
+
+class TeacherNotificationListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.NotificationSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        user = get_user_from_request(self.request)
+        if user:
+            teacher = api_models.Teacher.objects.filter(user=user).first()
+            if not teacher:
+                raise ValueError('No teacher found')
+        else:
+            raise ValueError('No user found')
+
+        return api_models.Notification.objects.filter(teacher=teacher, seen=False)
+
+
+class TeacherNotificationDetailAPIView(generics.RetrieveDestroyAPIView):
+    serializer_class = api_serializer.NotificationSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        user = get_user_from_request(self.request)
+        if user:
+            teacher = api_models.Teacher.objects.filter(user=user).first()
+            if not teacher:
+                raise ValueError('No teacher found')
+        else:
+            raise ValueError('No user found')
+
+        notification_id = self.kwargs['notification_id']
+
+        return api_models.Notification.objects.get(teacher=teacher, id=notification_id)
+
 
 

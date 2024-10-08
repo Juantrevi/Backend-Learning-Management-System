@@ -92,6 +92,28 @@ urlpatterns = [
     path('teacher/review-list/', TeacherReviewListAPIView.as_view()),
     path('teacher/review-detail/<review_id>', TeacherReviewDetailAPIView.as_view()),
     path('teacher/students-list/', TeacherStudentsListAPIView.as_view({'get': 'list'})),
+    path('teacher/all-months-earning/', TeacherAllMonthsEarningAPIView),
+    path('teacher/best-course-earning/', TeacherBestSellingCourseAPIView.as_view({'get': 'list'})),
+    path('teacher/course-order-list/', TeacherCourseOrdersListAPIView.as_view()),
+    path('teacher/question-answer-list/', TeacherQuestionAnswerListAPIView.as_view()),
+    path('teacher/coupon-list/', TeacherCouponListCreateAPIView.as_view()),
+    path('teacher/coupon-detail/<coupon_id>/', TeacherCouponDetailAPIView.as_view()),
+    path('teacher/notification-list/', TeacherNotificationListAPIView.as_view()),
+    path('teacher/notification-detail/<notification_id>', TeacherNotificationDetailAPIView.as_view()),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
