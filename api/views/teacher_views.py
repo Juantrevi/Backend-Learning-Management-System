@@ -1,3 +1,5 @@
+from django.db.models.functions import ExtractMonth
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import generics, viewsets
 from rest_framework.permissions import AllowAny
@@ -140,3 +142,83 @@ class TeacherStudentsListAPIView(viewsets.ViewSet):
                 unique_student_ids.add(course.user_id)
 
         return Response(total_students)
+
+
+@api_view({'GET'})
+def TeacherAllMonthsEarningAPIView(request, teacher_id):
+    teacher = api_models.Teacher.objects.get(id=teacher_id)
+    monthly_earning_tracker = (
+        api_models.CartOrderItem.objects
+        .filter(teacher=teacher, order__payment_status='Paid')
+        .annotate(
+            month=ExtractMonth('date')
+        )
+        .values('months')
+        .annotate(
+            total_earning = models.Sum('price')
+        )
+        .order_by('month')
+    )
+
+    return Response(monthly_earning_tracker)
+
+
+class TeacherBestSellingCourseAPIView(viewsets.ViewSet):
+
+    def list(self, request):
+        user = get_user_from_request(self.request)
+        if user:
+            teacher = api_models.Teacher.objects.filter(user=user).first()
+            if not teacher:
+                raise ValueError('No teacher found')
+        else:
+            raise ValueError('No user found')
+
+        courses_with_total_price = []
+        courses = api_models.Course.objects.filter(teacher=teacher)
+
+        for course in courses:
+            revenue = course.enrolledcourse_set.aggregate(total_price=models.Sum('order_item__price'))['total_price'] or 0
+            sales = course.enrolledcourse_set.count()
+
+            courses_with_total_price.append({
+                'course_image': course.image.url,
+                'course_title': course.title,
+                'revenue': revenue,
+                'sales': sales,
+            })
+        return Response(courses_with_total_price)
+
+
+class TeacherCourseOrdersListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.CartOrderItemSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        user = get_user_from_request(self.request)
+        if user:
+            teacher = api_models.Teacher.objects.filter(user=user).first()
+            if not teacher:
+                raise ValueError('No teacher found')
+        else:
+            raise ValueError('No user found')
+
+        return api_models.CartOrderItem.objects.filter(teacher=teacher)
+
+
+class TeacherQuestionAnswerListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.QuestionAnswerSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        user = get_user_from_request(self.request)
+        if user:
+            teacher = api_models.Teacher.objects.filter(user=user).first()
+            if not teacher:
+                raise ValueError('No teacher found')
+        else:
+            raise ValueError('No user found')
+
+        return api_models.QuestionAnswer.objects.filter(course__teacher=teacher)
+
+
