@@ -101,7 +101,8 @@ urlpatterns = [
     path('teacher/notification-list/', TeacherNotificationListAPIView.as_view()),
     path('teacher/notification-detail/<notification_id>/', TeacherNotificationDetailAPIView.as_view()),
     # In course_view.py
-    path('teacher/course/create/', CourseCreateAPIView.as_view()),
+    path('teacher/course-create/', CourseCreateAPIView.as_view()),
+    path('teacher/course-update/<course_id>/', CourseUpdateAPIView.as_view()),
 
 
 ]
