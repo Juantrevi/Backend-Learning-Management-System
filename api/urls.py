@@ -99,25 +99,9 @@ urlpatterns = [
     path('teacher/coupon-list/', TeacherCouponListCreateAPIView.as_view()),
     path('teacher/coupon-detail/<coupon_id>/', TeacherCouponDetailAPIView.as_view()),
     path('teacher/notification-list/', TeacherNotificationListAPIView.as_view()),
-    path('teacher/notification-detail/<notification_id>', TeacherNotificationDetailAPIView.as_view()),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    path('teacher/notification-detail/<notification_id>/', TeacherNotificationDetailAPIView.as_view()),
+    # In course_view.py
+    path('teacher/course/create/', CourseCreateAPIView.as_view()),
 
 
 ]

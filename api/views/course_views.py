@@ -53,3 +53,69 @@ class CategoryListAPIView(generics.ListAPIView):
     # TODO: Change the permission
     permission_classes = [AllowAny]
 
+
+def strtobool(val):
+    val = val.lower()
+    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+        return True
+    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+        return False
+    else:
+        raise ValueError(f"invalid truth value {val}")
+
+
+class CourseCreateAPIView(generics.CreateAPIView):
+    queryset = api_models.Course.objects.all()
+    serializer_class = api_serializer.CourseSerializer
+    permission_classes = [AllowAny]
+
+    def perform_create(self, serializer):
+        serializer.is_valid(raise_exception=True)
+        course_instance = serializer.save()
+
+        variant_data = []
+
+        for key, value in self.request.data.items():
+            if key.startswith('variant') and ['variant_title'] in key:
+                index = key.split('[')[1].split(']')[0]
+                title = value
+
+                variant_data = {'title': title}
+                item_data_list = []
+                current_item = {}
+
+                for item_key, item_value in self.request.data.items():
+                    if f'variant[{index}][items]' in item_key:
+                        field_name = item_key.split('[')[-1].split(']')[0]
+                        if field_name == 'title':
+                            if current_item:
+                                item_data_list.append(current_item)
+                            else:
+                                current_item = {}
+                        else:
+                            current_item.update({field_name: item_value})
+                if current_item:
+                    item_data_list.append(current_item)
+
+                variant_data.append({'variant_data': variant_data, 'variant_item_data': item_data_list})
+
+        for data_entry in variant_data:
+            variant = api_models.Variant.objects.create(title=data_entry['variant_data']['title'],
+                                                        course=course_instance)
+
+            for item_data in data_entry['variant_item_data']:
+                preview_value = item_data.get('preview')
+                preview = bool(strtobool(str(preview_value))) if preview_value is not None else False
+
+                api_models.VariantItem.objects.create(
+                    variant=variant,
+                    title=item_data.get('title'),
+                    description=item_data.get('description'),
+                    file=item_data.get('file'),
+                    preview=preview,
+                )
+
+    def save_nested_data(self, course_instance, serializer_class, data):
+        serializer = serializer_class(data=data, many=True, context={'course_instance': course_instance})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(course=course_instance)

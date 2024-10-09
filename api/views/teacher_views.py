@@ -299,3 +299,5 @@ class TeacherNotificationDetailAPIView(generics.RetrieveDestroyAPIView):
 
 
 
+
+
