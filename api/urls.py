@@ -104,7 +104,7 @@ urlpatterns = [
     path('teacher/course-create/', CourseCreateAPIView.as_view()),
     path('teacher/course-update/<course_id>/', CourseUpdateAPIView.as_view()),
     path('teacher/course-detail/<course_id>/', CourseDetailAPIView.as_view()),
-    path('teacher/course-variant-delete/<course_id>/<course_id>/', CourseVariantDeleteAPIView.as_view()),
+    path('teacher/course-variant-delete/<variant_id>/<course_id>/', CourseVariantDeleteAPIView.as_view()),
     path('teacher/course-variant-item-delete/<variant_id>/<variant_item_id>/<course_id>/', CourseVariantItemDeleteAPIView.as_view()),
 
 
