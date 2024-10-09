@@ -161,6 +161,8 @@ class CourseUpdateAPIView(generics.RetrieveUpdateAPIView):
             category = api_models.Category.objects.get(id=request.data['category'])
             course.category = category
 
+        self.perform_update(serializer)
+        self.update_variant(course, request.data)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update_variant(self, course, request_data):
