@@ -29,7 +29,7 @@ class BestCoursesListAPIView(generics.ListAPIView):
         ).order_by('-avg_rating')[:4]
 
 
-class CourseDetailAPIView(generics.RetrieveAPIView):
+class CourseDetailAPIView(generics.RetrieveDestroyAPIView):
     serializer_class = api_serializer.CourseSerializer
     permission_classes = [AllowAny]
 
@@ -264,6 +264,54 @@ class CourseUpdateAPIView(generics.RetrieveUpdateAPIView):
         serializer = serializer_class(data=data, many=True, context={'course_instance': course_instance})
         serializer.is_valid(raise_exception=True)
         serializer.save(course=course_instance)
+
+
+class CourseVariantDeleteAPIView(generics.DestroyAPIView):
+    serializer_class = api_serializer.VariantSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        user = get_user_from_request(self.request)
+        if user:
+            teacher = api_models.Teacher.objects.filter(user=user).first()
+            if not teacher:
+                raise ValueError('No teacher found')
+        else:
+            raise ValueError('No user found')
+        variant_id = self.kwargs['variant_id']
+        course_id = self.kwargs['course_id']
+
+        course = api_models.Course.objects.get(teacher=teacher, course_id=course_id)
+        return api_models.Variant.objects.get(variant_id=variant_id)
+
+
+class CourseVariantItemDeleteAPIView(generics.DestroyAPIView):
+    serializer_class = api_serializer.VariantItemSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        user = get_user_from_request(self.request)
+        if user:
+            teacher = api_models.Teacher.objects.filter(user=user).first()
+            if not teacher:
+                raise ValueError('No teacher found')
+        else:
+            raise ValueError('No user found')
+        variant_id = self.kwargs['variant_id']
+        course_id = self.kwargs['course_id']
+        variant_item_id = self.kwargs['variant_item_id']
+
+        course = api_models.Course.objects.get(teacher=teacher, course_id=course_id)
+        variant = api_models.Variant.objects.get(variant_id=variant_id, course=course)
+        return api_models.VariantItem.objects.get(variant=variant, variant_item_id=variant_item_id)
+
+
+
+
+
+
+
+
 
 
 
