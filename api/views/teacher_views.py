@@ -1,3 +1,5 @@
+import operator
+
 from django.db.models.functions import ExtractMonth
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -196,6 +198,10 @@ class TeacherBestSellingCourseAPIView(viewsets.ViewSet):
                 'revenue': revenue,
                 'sales': sales,
             })
+
+        # Sort courses by revenue in descending order
+        courses_with_total_price.sort(key=operator.itemgetter('revenue'), reverse=True)
+
         return Response(courses_with_total_price)
 
 
