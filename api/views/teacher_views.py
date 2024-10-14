@@ -237,7 +237,7 @@ class TeacherQuestionAnswerListAPIView(generics.ListAPIView):
         return api_models.QuestionAnswer.objects.filter(course__teacher=teacher)
 
 
-class TeacherCouponListCreateAPIView(generics.ListAPIView):
+class TeacherCouponListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = api_serializer.CouponSerializer
     permission_classes = [AllowAny]
 
@@ -251,6 +251,18 @@ class TeacherCouponListCreateAPIView(generics.ListAPIView):
             raise ValueError('No user found')
 
         return api_models.Coupon.objects.filter(teacher=teacher)
+
+    def perform_create(self, serializer):
+        user = get_user_from_request(self.request)
+        if user:
+            teacher = api_models.Teacher.objects.filter(user=user).first()
+            if not teacher:
+                raise ValueError('No teacher found')
+        else:
+            raise ValueError('No user found')
+
+        serializer.save(teacher=teacher)
+
 
 
 class TeacherCouponDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -283,10 +295,10 @@ class TeacherNotificationListAPIView(generics.ListAPIView):
         else:
             raise ValueError('No user found')
 
-        return api_models.Notification.objects.filter(teacher=teacher, seen=False)
+        return api_models.Notification.objects.filter(teacher=teacher)
 
 
-class TeacherNotificationDetailAPIView(generics.RetrieveDestroyAPIView):
+class TeacherNotificationDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = api_serializer.NotificationSerializer
     permission_classes = [AllowAny]
 
